@@ -3,7 +3,7 @@
 	import github from "$lib/images/github.svg";
 	import linkedin from "$lib/images/linkedin.svg";
 	import email from "$lib/images/email.svg";
-	// import { base } from "$app/paths";
+	import cv from "$lib/cv.pdf";
 </script>
 
 <header>
@@ -27,7 +27,7 @@
 					? "page"
 					: undefined}
 			>
-				<a href="/resume">resume.pdf</a>
+				<a href={cv} download="Lukas_Sandman_CV">resume.pdf</a>
 			</li>
 		</ul>
 		<svg viewBox="0 0 2 3" aria-hidden="true">

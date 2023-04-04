@@ -7,14 +7,6 @@
 	export let data: PageData;
 </script>
 
-<!-- <div class="app">
-	<Header />
-
-	<main>
-		<slot />
-	</main>
-</div> -->
-
 	<div class="app">
 		<Header/>
 		<PageTransition key={data.url} duration={350}>
