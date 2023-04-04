@@ -22,11 +22,7 @@
 			>
 				<a href="/whoami">whoami</a>
 			</li>
-			<li
-				aria-current={$page.url.pathname === "/resume"
-					? "page"
-					: undefined}
-			>
+			<li>
 				<a href={cv} download="Lukas_Sandman_CV">resume.pdf</a>
 			</li>
 		</ul>
