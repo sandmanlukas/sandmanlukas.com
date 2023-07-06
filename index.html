@@ -1,21 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 	<head>
 		<meta charset="utf-8" />
+		<meta name="color-scheme" content="dark"/>
 		<link rel="icon" href="./favicon.png" />
 		<meta name="viewport" content="width=device-width" />
+
+		<script>
+			localStorage.theme === 'dark' ||
+			(!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+				? document.documentElement.classList.add('dark')
+				: document.documentElement.classList.remove('dark');
+		</script>
 		<meta http-equiv="content-security-policy" content="">
-		<link href="./_app/immutable/assets/_layout.de65a72e.css" rel="stylesheet">
-		<link href="./_app/immutable/assets/_page.5018d7d9.css" rel="stylesheet">
-		<link rel="modulepreload" href="./_app/immutable/entry/start.75cb8143.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/index.cbadaae8.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.5237ee99.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/app.75443cd6.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/_layout.svelte.cb11da51.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/stores.32f8e4ae.js">
+		<link href="./_app/immutable/assets/_layout.daa20ee1.css" rel="stylesheet">
+		<link href="./_app/immutable/assets/_page.299a0258.css" rel="stylesheet">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.4bf723ce.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.d5f9b0e9.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.0621d2da.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.4cd59fd4.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/_layout.svelte.a22dc916.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/stores.62c85190.js">
 		<link rel="modulepreload" href="./_app/immutable/entry/_layout.ts.dbc5bb43.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/_layout.b63f00f0.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/_page.svelte.2d48d102.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/_page.svelte.60d6cabb.js">
 		<link rel="modulepreload" href="./_app/immutable/entry/_page.ts.9c5eea7e.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/_page.da46b06b.js"><title>Home</title><!-- HEAD_svelte-1hb41r4_START --><meta name="description" content="Personal website of sandmanlukas"><!-- HEAD_svelte-1hb41r4_END -->
 	</head>
@@ -23,20 +31,25 @@
 		<div style="display: contents">
 
 
-<div class="app svelte-5iwt1v"><header class="svelte-17dvvbk"><nav class="svelte-17dvvbk"><svg viewBox="0 0 2 3" aria-hidden="true" class="svelte-17dvvbk"><path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" class="svelte-17dvvbk"></path></svg>
-		<ul class="svelte-17dvvbk"><li aria-current="page" class="svelte-17dvvbk"><a href="/" class="svelte-17dvvbk">/home/</a></li>
-			<li class="svelte-17dvvbk"><a href="/whoami" class="svelte-17dvvbk">whoami</a></li>
-			<li class="svelte-17dvvbk"><a href="/_app/immutable/assets/cv.c6990214.pdf" download="Lukas_Sandman_CV" class="svelte-17dvvbk">resume.pdf</a></li></ul>
-		<svg viewBox="0 0 2 3" aria-hidden="true" class="svelte-17dvvbk"><path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" class="svelte-17dvvbk"></path></svg></nav>
+<div class="app svelte-5iwt1v"><header class="svelte-1iky9ev"><nav class="svelte-1iky9ev"><svg viewBox="0 0 2 3" aria-hidden="true" class="svelte-1iky9ev"><path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" class="svelte-1iky9ev"></path></svg>
+		<ul class="svelte-1iky9ev"><li aria-current="page" class="svelte-1iky9ev"><a href="/" class="svelte-1iky9ev">/home/</a></li>
+			<li class="svelte-1iky9ev"><a href="/whoami" class="svelte-1iky9ev">whoami</a></li>
+			<li class="svelte-1iky9ev"><a href="/projects" class="svelte-1iky9ev">projects</a></li>
+			<li class="svelte-1iky9ev"><a href="/_app/immutable/assets/cv.c6990214.pdf" download="Lukas_Sandman_CV" class="svelte-1iky9ev">resume.pdf</a></li></ul>
+		<svg viewBox="0 0 2 3" aria-hidden="true" class="svelte-1iky9ev"><path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" class="svelte-1iky9ev"></path></svg></nav>
 
-	<div class="corner svelte-17dvvbk"><a href="https://www.linkedin.com/in/lukas-sandman-1805a7190/" class="svelte-17dvvbk"><img src="/_app/immutable/assets/linkedin.7c2e28bc.svg" alt="LinkedIn" class="svelte-17dvvbk"></a>
-		<a href="https://github.com/sandmanlukas" class="svelte-17dvvbk"><img src="/_app/immutable/assets/github.08b75914.svg" alt="GitHub" class="svelte-17dvvbk"></a>
-		<a href="mailto:sandmanlukas@gmail.com" class="svelte-17dvvbk"><img src="/_app/immutable/assets/email.435484b3.svg" alt="E-Mail" class="svelte-17dvvbk"></a></div>
+	<div class="corner svelte-1iky9ev"><a href="https://www.linkedin.com/in/lukas-sandman-1805a7190/" class="svelte-1iky9ev"><img src="/_app/immutable/assets/linkedin.7c0df67a.svg" alt="LinkedIn" class="svelte-1iky9ev"></a>
+		<a href="https://github.com/sandmanlukas" class="svelte-1iky9ev"><img src="/_app/immutable/assets/github.08b75914.svg" alt="GitHub" class="svelte-1iky9ev"></a>
+		<a href="mailto:sandmanlukas@gmail.com" class="svelte-1iky9ev"><img src="/_app/immutable/assets/email.435484b3.svg" alt="E-Mail" class="svelte-1iky9ev"></a></div>
 </header>
+		<div><input checked type="checkbox" id="theme-toggle" class="svelte-1mutd23">
+    <label for="theme-toggle" class="svelte-1mutd23"></label>
+</div>
 		<div class="svelte-15krft9"><main class="svelte-5iwt1v">
 
-<section class="svelte-39krom"><h1 class="svelte-39krom">First page baby</h1>
-	<p>Will probably be some sort of introduction to me, myself and I.</p>
+<section class="svelte-1qzw3vj"><h1 class="svelte-1qzw3vj">Hello!</h1>
+	<p>I&#39;m Lukas, a software developer based in Gothenburg, Sweden. </p>
+
 </section></main></div>
 	</div>
 
@@ -44,7 +57,7 @@
 			
 			<script>
 				{
-					__sveltekit_fkmonx = {
+					__sveltekit_fjsrn9 = {
 						env: {},
 						base: new URL(".", location).pathname.slice(0, -1),
 						element: document.currentScript.parentElement
@@ -53,10 +66,10 @@
 					const data = [null,null];
 
 					Promise.all([
-						import("./_app/immutable/entry/start.75cb8143.js"),
-						import("./_app/immutable/entry/app.75443cd6.js")
+						import("./_app/immutable/entry/start.4bf723ce.js"),
+						import("./_app/immutable/entry/app.4cd59fd4.js")
 					]).then(([kit, app]) => {
-						kit.start(app, __sveltekit_fkmonx.element, {
+						kit.start(app, __sveltekit_fjsrn9.element, {
 							node_ids: [0, 2],
 							data,
 							form: null,
