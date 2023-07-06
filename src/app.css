@@ -24,7 +24,7 @@
 
 body  {
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-    @apply bg-white dark:bg-black text-black dark:text-white text-center;
+    @apply bg-white dark:bg-zinc-600 text-black dark:text-white text-center;
   }
 
   .corner img {
@@ -39,12 +39,6 @@ body {
 	background-attachment: fixed;
 	background-color: var(--color-bg-1);
 	background-size: 100vw 100vh;
-	/* background-image: radial-gradient(
-			50% 50% at 50% 50%,
-			rgba(255, 255, 255, 0.75) 0%,
-			rgba(255, 255, 255, 0) 100%
-		),
-		linear-gradient(180deg, var(--color-bg-0) 0%, var(--color-bg-1) 15%, var(--color-bg-2) 50%); */
 }
 
 h1,
