@@ -7,8 +7,9 @@
 </svelte:head>
 
 <section>
-	<h1>First page baby</h1>
-	<p>Will probably be some sort of introduction to me, myself and I.</p>
+	<h1>Hello!</h1>
+	<p>I'm Lukas, a software developer based in Gothenburg, Sweden. </p>
+
 </section>
 
 <style>
@@ -21,6 +22,11 @@
 	}
 
 	h1 {
+		width: 100%;
+		display: flex;
+	}
+
+	h2 {
 		width: 100%;
 	}
 </style>

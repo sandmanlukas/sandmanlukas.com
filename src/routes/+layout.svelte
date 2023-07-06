@@ -1,14 +1,16 @@
 <script lang="ts">
 	import Header from './Header.svelte';
-	import './styles.css';
+	import "../app.css";
 	import PageTransition from "./transition.svelte";
 	import type { PageData } from './$types';
+    import ThemeSwitch from '$lib/ThemeSwitch/ThemeSwitch.svelte';
 
 	export let data: PageData;
 </script>
 
 	<div class="app">
 		<Header/>
+		<ThemeSwitch/>
 		<PageTransition key={data.url} duration={350}>
 			<main>
 				<slot/>

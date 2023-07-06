@@ -1,9 +1,13 @@
-<script>
+<script lang=ts>
 	import { page } from "$app/stores";
+	import { browser } from '$app/environment';
+
 	import github from "$lib/images/github.svg";
 	import linkedin from "$lib/images/linkedin.svg";
 	import email from "$lib/images/email.svg";
 	import cv from "$lib/cv.pdf";
+
+
 </script>
 
 <header>
@@ -22,6 +26,13 @@
 			>
 				<a href="/whoami">whoami</a>
 			</li>
+			<li
+			aria-current={$page.url.pathname === "/projects"
+				? "page"
+				: undefined}
+		>
+			<a href="/projects">projects</a>
+		</li>
 			<li>
 				<a href={cv} download="Lukas_Sandman_CV">resume.pdf</a>
 			</li>
@@ -29,6 +40,7 @@
 		<svg viewBox="0 0 2 3" aria-hidden="true">
 			<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" />
 		</svg>
+		
 	</nav>
 
 	<div class="corner">
@@ -47,7 +59,7 @@
 <style>
 	header {
 		display: flex;
-		justify-content: space-between;
+		/* justify-content: space; */
 	}
 
 	.corner {
