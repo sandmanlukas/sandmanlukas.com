@@ -23,8 +23,9 @@
 
 
 body  {
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-    @apply bg-white dark:bg-zinc-600 text-black dark:text-white text-center;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; 
+    @apply bg-white dark:bg-zinc-600 text-black dark:text-text-dark text-center; 
+
   }
 
   .corner img {
@@ -116,3 +117,8 @@ button:focus:not(:focus-visible) {
 	width: 1px;
 	white-space: nowrap;
 }
+
+.card {
+	@apply border-black dark:border-white;
+}
+

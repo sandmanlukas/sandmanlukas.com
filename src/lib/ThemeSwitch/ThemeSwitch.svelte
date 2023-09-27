@@ -1,36 +1,40 @@
 <script lang="ts">
-    import {browser} from '$app/environment';
+    import { browser } from "$app/environment";
 
-    let darkMode = true;
+    let darkMode: boolean = true;
 
     function handleSwitchDarkMode() {
-        darkMode = !darkMode;
-        
-        localStorage.setItem('theme', darkMode ? 'dark':'light');
+            darkMode = !darkMode;
 
-        darkMode
-            ? document.documentElement.classList.add("dark")
-            : document.documentElement.classList.remove("dark");
+            localStorage.setItem("theme", darkMode ? "dark" : "light");
+            darkMode
+                ? document.documentElement.classList.add("dark")
+                : document.documentElement.classList.remove("dark");
     }
 
-    if (browser) {
+    if (browser) {        
         if (
-            localStorage.theme === 'dark' || 
-            (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches) 
-        ){
-            document.documentElement.classList.add('dark');
+            localStorage.theme === "dark" ||
+            (!("theme" in localStorage) &&
+                window.matchMedia("(prefers-color-scheme: dark)").matches)
+        ) {
+            document.documentElement.classList.add("dark");
             darkMode = true;
-
-        } else {
-            document.documentElement.classList.remove('dark');
+        } 
+        else {
+            document.documentElement.classList.remove("dark");
             darkMode = false;
-
         }
     }
 </script>
 
 <div>
-    <input checked={darkMode} on:click={handleSwitchDarkMode} type="checkbox" id="theme-toggle" />
+    <input
+        checked={!darkMode}
+        on:click={handleSwitchDarkMode}
+        type="checkbox"
+        id="theme-toggle"
+    />
     <label for="theme-toggle" />
 </div>
 
@@ -49,6 +53,6 @@
 
     #theme-toggle:checked + label {
         @apply bg-transparent;
-        box-shadow: inset -12px -8px 1px 1px #ddd;
+        box-shadow: inset -12px -8px 1px 1px #333;
     }
 </style>

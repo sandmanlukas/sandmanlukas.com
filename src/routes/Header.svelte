@@ -1,6 +1,5 @@
 <script lang=ts>
 	import { page } from "$app/stores";
-	import { browser } from '$app/environment';
 
 	import github from "$lib/images/github.svg";
 	import linkedin from "$lib/images/linkedin.svg";

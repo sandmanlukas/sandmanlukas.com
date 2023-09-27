@@ -8,7 +8,7 @@
 	export let data: PageData;
 </script>
 
-	<div class="app">
+	<div data-sveltekit-preload-data="hover" class="app">
 		<Header/>
 		<ThemeSwitch/>
 		<PageTransition key={data.url} duration={350}>
