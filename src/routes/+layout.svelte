@@ -1,22 +1,22 @@
 <script lang="ts">
-	import Header from './Header.svelte';
+	import Header from "./Header.svelte";
 	import "../app.css";
 	import PageTransition from "./transition.svelte";
-	import type { PageData } from './$types';
-    import ThemeSwitch from '$lib/ThemeSwitch/ThemeSwitch.svelte';
+	import type { PageData } from "./$types";
+	import ThemeSwitch from "$lib/ThemeSwitch/ThemeSwitch.svelte";
 
 	export let data: PageData;
 </script>
 
-	<div data-sveltekit-preload-data="hover" class="app">
-		<Header/>
-		<ThemeSwitch/>
-		<PageTransition key={data.url} duration={350}>
-			<main>
-				<slot/>
-			</main>
-		</PageTransition>
-	</div>
+<div data-sveltekit-preload-data="hover" class="app">
+	<Header />
+	<ThemeSwitch />
+	<PageTransition key={data.url} duration={350}>
+		<main>
+			<slot />
+		</main>
+	</PageTransition>
+</div>
 
 <style>
 	.app {
@@ -35,5 +35,4 @@
 		margin: 0 auto;
 		box-sizing: border-box;
 	}
-
 </style>
