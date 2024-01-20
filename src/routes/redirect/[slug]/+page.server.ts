@@ -1,6 +1,7 @@
 import { testAuthGetter } from "$lib/server/data";
 import { getUserStats } from "../../../utils.js";
 
+export const prerender = false;
 export async function load({ url }) {
     let code = url.searchParams.get('code');
     let scope = url.searchParams.get("scope");
