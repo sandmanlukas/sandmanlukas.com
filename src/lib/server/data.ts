@@ -21,10 +21,7 @@ export const refreshToken = async (refreshToken: string) => {
             client_id: PUBLIC_CLIENT_ID,
             client_secret: CLIENT_SECRET,
             refresh_token: refreshToken,
-            grant_type:'refresh_token',});
-
-        console.log(response.data);
-        
+            grant_type:'refresh_token',});        
         return { body: { access_token: response.data.access_token, expires_at: response.data.expires_at } };
     } catch (error) {
         return {status : 500, body: { error: 'Failed to refresh token' }};

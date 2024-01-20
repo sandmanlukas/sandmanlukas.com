@@ -1,11 +1,13 @@
 <script>
     import { userData, userStats } from "../../store";
     import { getUserData, getUserStats } from "../../utils";
-    import { PUBLIC_CLIENT_ID, PUBLIC_REDIRECT_URI } from "$env/static/public";
+    import { PUBLIC_CLIENT_ID } from "$env/static/public";
     import { onMount } from "svelte";
 
-    const handleLogin = () => {
-        const redirectUrl = `http://${PUBLIC_REDIRECT_URI}/redirect`;
+    let uri = "";
+    const handleLogin = (/** @type {string} */ uri) => {
+
+        const redirectUrl = `http://${uri}/redirect`;
         const scope = "read_all";
         window.location.href = `http://www.strava.com/oauth/authorize?client_id=${PUBLIC_CLIENT_ID}&response_type=code&redirect_uri=${redirectUrl}/exchange_token&approval_prompt=force&scope=${scope}`;
     };
@@ -17,6 +19,7 @@
     let totalSwimDistance = 0;
 
     onMount(async () => {
+        uri = window.location.host;
         const expiresAtStr = localStorage.getItem("expires_at");
         const expiresAt = expiresAtStr ? parseInt(expiresAtStr) : null;
         const currentTime = new Date().getTime();
@@ -30,14 +33,12 @@
             if (userId && accessToken) {
                 await getUserStats(userId, accessToken).then((data) => {
                     if (data) {
-                        console.log(data.data);
                         userStats.set(data.data);
                     }
                 });
 
                 await getUserData(accessToken).then((data) => {
                     if (data) {
-                        console.log(data.data);
                         userData.set(data.data);
                     }
                 });
@@ -74,7 +75,7 @@
     {#if $userData === null && $userStats === null}
         <div class="centered">
             <p>Visualize your Strava data by pressing the button below.</p>
-            <button on:click={handleLogin}>Connect with Strava</button>
+            <button on:click={() => handleLogin(uri)}>Connect with Strava</button>
         </div>
     {:else if $userData !== null && $userStats !== null}
         <div>
