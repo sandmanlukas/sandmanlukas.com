@@ -17,6 +17,7 @@
 	--color-text: rgba(0, 0, 0, 0.7);
 	--column-width: 42rem;
 	--column-margin-top: 4rem;
+	--dot-color: #000;
 	font-family: Hack, monospace;
 	color: var(--color-text);
 }
@@ -121,4 +122,10 @@ button:focus:not(:focus-visible) {
 .card {
 	@apply border-black dark:border-white;
 }
+
+
+.dark {
+	--dot-color: #ddd;	
+}
+
 
