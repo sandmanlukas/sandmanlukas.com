@@ -29,3 +29,70 @@ export type TokenData = {
     access_token: string;
     athlete: Athlete;
 };
+
+export type ActivitiesRequest = {
+    before?: string;
+    after?: string;
+    per_page?: number;
+    page?: number;
+};
+
+export type Map = {
+    id: string;
+    summary_polyline: string;
+    resource_state: number;
+}
+
+export type Activity = {
+    resource_state: number;
+    athlete: Athlete;
+    name: string;
+    distance: number;
+    moving_time: number;
+    elapsed_time: number;
+    total_elevation_gain: number;
+    type: string;
+    sport_type: string;
+    workout_type: null | string;
+    id: number;
+    start_date: string;
+    start_date_local: string;
+    timezone: string;
+    utc_offset: number;
+    location_city: null | string;
+    location_state: null | string;
+    location_country: null | string;
+    achievement_count: number;
+    kudos_count: number;
+    comment_count: number;
+    athlete_count: number;
+    photo_count: number;
+    map: Map;
+    trainer: boolean;
+    commute: boolean;
+    manual: boolean;
+    private: boolean;
+    visibility: string;
+    flagged: boolean;
+    gear_id: string;
+    start_latlng: number[];
+    end_latlng: number[];
+    average_speed: number;
+    max_speed: number;
+    average_cadence: number;
+    has_heartrate: boolean;
+    average_heartrate: number;
+    max_heartrate: number;
+    heartrate_opt_out: boolean;
+    display_hide_heartrate_option: boolean;
+    elev_high: number;
+    elev_low: number;
+    upload_id: number;
+    upload_id_str: string;
+    external_id: string;
+    from_accepted_tag: boolean;
+    pr_count: number;
+    total_photo_count: number;
+    has_kudoed: boolean;
+}
+
