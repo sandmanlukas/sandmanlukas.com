@@ -1,11 +1,11 @@
 <script>
     import { userData, userStats } from "../../store";
     import { getUserData, getUserStats } from "../../utils";
-    import { PUBLIC_CLIENT_ID } from "$env/static/public";
+    import { PUBLIC_CLIENT_ID, PUBLIC_REDIRECT_URI } from "$env/static/public";
     import { onMount } from "svelte";
 
     const handleLogin = () => {
-        const redirectUrl = "http://localhost:5173/redirect";
+        const redirectUrl = `http://${PUBLIC_REDIRECT_URI}/redirect`;
         const scope = "read_all";
         window.location.href = `http://www.strava.com/oauth/authorize?client_id=${PUBLIC_CLIENT_ID}&response_type=code&redirect_uri=${redirectUrl}/exchange_token&approval_prompt=force&scope=${scope}`;
     };
