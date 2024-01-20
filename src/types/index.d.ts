@@ -49,14 +49,20 @@ export type Activity = {
     name: string;
     distance: number;
     moving_time: number;
+    moving_time_str?: string;
     elapsed_time: number;
+    elapsed_time_str?: string;
     total_elevation_gain: number;
     type: string;
     sport_type: string;
     workout_type: null | string;
     id: number;
     start_date: string;
+    start_date_formatted?: string;
+    start_time?: string;
     start_date_local: string;
+    start_date_local_formatted?: string;
+    start_time_local?: string;
     timezone: string;
     utc_offset: number;
     location_city: null | string;
@@ -78,6 +84,7 @@ export type Activity = {
     start_latlng: number[];
     end_latlng: number[];
     average_speed: number;
+    average_speed_km?: number;
     max_speed: number;
     average_cadence: number;
     has_heartrate: boolean;
@@ -99,14 +106,20 @@ export type Activity = {
 type Totals = {
     count: number;
     distance: number;
-    moving_time: number | string;
-    elapsed_time: number | string;
+    distance_km?: number;
+    moving_time: number;
+    moving_time_str?: string;
+    elapsed_time: number;
+    elapsed_time_str?: string;
     elevation_gain: number;
     achievement_count?: number;
+    total_average_speed?: number;
+
 };
 
 export type UserStats = {
     biggest_ride_distance: null | number;
+    biggest_run_distance: null | number;
     biggest_climb_elevation_gain: null | number;
     recent_ride_totals: Totals;
     all_ride_totals: Totals;

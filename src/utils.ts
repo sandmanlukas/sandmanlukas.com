@@ -23,11 +23,11 @@ export const getUserActivities = async (accessToken: string, before = "", after 
             per_page: perPage,
             page: page
         };
-        
+
         if (before) {
             params.before = before;
         }
-        
+
         if (after) {
             params.after = after;
         }
@@ -38,21 +38,21 @@ export const getUserActivities = async (accessToken: string, before = "", after 
                     params: params,
                     headers: { Authorization: `Bearer ${accessToken}` }
                 }
-                );
-                
-                if (response.data.length > 0) {
-                    allActivities = [...allActivities, ...response.data];
-                    page++;
-                } else {
-                    break;
-                }
+            );
 
-            } catch (error) {
-                console.log(error);
+            if (response.data.length > 0) {
+                allActivities = [...allActivities, ...response.data];
+                page++;
+            } else {
                 break;
             }
-        } while (true);
-        return allActivities;
+
+        } catch (error) {
+            console.log(error);
+            break;
+        }
+    } while (true);
+    return allActivities;
 };
 
 export const getUserData = async (accessToken: string) => {
@@ -89,8 +89,90 @@ export const convertSeconds = (seconds: number): string => {
     const minutes = Math.floor((seconds % 3600) / 60)
 
     if (hours > 0) {
-        return `${hours} hour${hours > 1 ? 's': ''} ${minutes} minute${minutes > 1 ? 's' : ''}`
-      } else {
-        return `${minutes} minute${minutes > 1 ? 's' : ''}`
-      }
-  }
+        return `${hours}h ${minutes}m`
+    } else {
+        return `${minutes}m`
+    }
+}
+
+export const getTypeIcon = (type: string): string => {
+    const typeToIcon = {
+        'AlpineSki': '⛷',
+        'BackcountrySki': '🎿',
+        'Badminton': '🏸',
+        'Canoeing': '🛶',
+        'Crossfit': '🏋️',
+        'EBikeRide': '🚴',
+        'Elliptical': '🚴',
+        'EMountainBikeRide': '🚴',
+        'Golf': '🏌️',
+        'GravelRide': '🚴',
+        'Handcycle': '🚴',
+        'HighIntensityIntervalTraining': '🏋️',
+        'Hike': '🥾',
+        'IceSkate': '⛸',
+        'InlineSkate': '🛼',
+        'Kayaking': '🛶',
+        'Kitesurf': '🏄',
+        'MountainBikeRide': '🚴',
+        'NordicSki': '🎿',
+        'Pickleball': '🎾',
+        'Pilates': '🧘',
+        'Racquetball': '🎾',
+        'Ride': '🚴',
+        'RockClimbing': '🧗',
+        'RollerSki': '🎿',
+        'Rowing': '🚣',
+        'Run': '🏃',
+        'Sail': '⛵',
+        'Skateboard': '🛹',
+        'Snowboard': '🏂',
+        'Snowshoe': '🥾',
+        'Soccer': '⚽',
+        'Squash': '🎾',
+        'StairStepper': '🏃',
+        'StandUpPaddling': '🏄',
+        'Surfing': '🏄',
+        'Swim': '🏊',
+        'TableTennis': '🏓',
+        'Tennis': '🎾',
+        'TrailRun': '🏃',
+        'Velomobile': '🚴',
+        'VirtualRide': '🚴',
+        'VirtualRow': '🚣',
+        'VirtualRun': '🏃',
+        'Walk': '🚶',
+        'WeightTraining': '🏋️',
+        'Wheelchair': '♿',
+        'Windsurf': '🏄',
+        'Workout': '🏋️',
+        'Yoga': '🧘'
+    };
+
+    return typeToIcon[type as keyof typeof typeToIcon] || '🏅'; // Default to a generic sports medal if the type is not recognized
+};
+
+export function formatDate(date: Date): string {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+        return "Today";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+        return "Yesterday";
+    } else {
+        return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+    }
+}
+
+export function formatTime(date: Date): string {
+    return date.toLocaleTimeString("sv-SE", {
+        hour: "numeric",
+        minute: "numeric",
+    });
+}

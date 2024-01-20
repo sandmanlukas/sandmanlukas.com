@@ -2,6 +2,9 @@
     import { userData, userStats, userActivities } from "../../store";
     import {
         convertSeconds,
+        formatDate,
+        formatTime,
+        getTypeIcon,
         getUserActivities,
         getUserData,
         getUserStats,
@@ -9,11 +12,19 @@
     } from "../../utils";
     import { PUBLIC_CLIENT_ID } from "$env/static/public";
     import { onMount } from "svelte";
-    import type { Totals, UserStats } from "../../types";
+    import type { Activity, Totals, UserStats } from "../../types";
+
+    const mountEverestHeight = 8848;
 
     let uri = "";
     let name = "";
-    let totalRunDistance = 0;
+    let totalRuns = 0;
+    let avgRunDistance = 0;
+    let longestRunDistance: number | null = 0;
+    let totalRunDistance: number | undefined = 0;
+    let totalRunTime: string | undefined = "";
+    let totalAverageSpeed: number | undefined = 0;
+    let totalElevationGain = 0;
     let totalRideDistance = 0;
     let totalSwimDistance = 0;
 
@@ -61,6 +72,40 @@
         }
     };
 
+    const formatActivities = (activities: Activity[]) => {
+        const newActivities = [...activities];
+
+        let longestRun = 0;
+        for (const activity of newActivities) {
+            if (
+                activity.sport_type === "Run" &&
+                activity.distance > longestRun
+            ) {
+                longestRun = activity.distance;
+            }
+
+            const startDate = new Date(activity.start_date);
+            const startDateLocal = new Date(activity.start_date_local);
+            activity.start_date_formatted = formatDate(startDate);
+            activity.start_date_local_formatted = formatDate(startDateLocal);
+            activity.start_time = formatTime(startDate);
+            activity.start_time_local = formatTime(startDateLocal);
+
+            activity.moving_time_str = convertSeconds(activity.moving_time);
+            activity.elapsed_time_str = convertSeconds(activity.elapsed_time);
+
+            // Convert distance to km, 1m/s = 0.06km/min
+            activity.average_speed_km = parseFloat(
+                (activity.average_speed * 0.06).toFixed(2),
+            );
+        }
+
+        if ($userStats) {
+            $userStats["biggest_run_distance"] = parseFloat((longestRun / 1000).toFixed(1));
+        }
+        return newActivities;
+    };
+
     const formatStats = (stats: UserStats) => {
         const newStats = { ...stats };
 
@@ -72,13 +117,24 @@
                 // Convert distance to km
                 const statObject = newStats[key as keyof UserStats] as Totals;
                 if (statObject) {
-                    statObject.distance = parseFloat(
+                    const totalDistanceInKm = parseFloat(
                         (statObject.distance / 1000).toFixed(1),
                     );
-                    statObject.elapsed_time = convertSeconds(
+                    const totalTimeInMinutes = parseFloat(
+                        (statObject.moving_time / 60).toFixed(1),
+                    );
+
+                    const totalAverageSpeed = parseFloat(
+                        (totalTimeInMinutes / totalDistanceInKm).toFixed(2),
+                    );
+
+                    statObject.total_average_speed = totalAverageSpeed;
+                    statObject.distance_km = totalDistanceInKm;
+
+                    statObject.elapsed_time_str = convertSeconds(
                         statObject.elapsed_time as number,
                     );
-                    statObject.moving_time = convertSeconds(
+                    statObject.moving_time_str = convertSeconds(
                         statObject.moving_time as number,
                     );
                 }
@@ -105,8 +161,9 @@
                 }),
                 getUserActivities(accessToken).then((data) => {
                     if (data) {
-                        userActivities.set(data);
-                        console.log(data);
+                        const activities = formatActivities(data);
+                        userActivities.set(activities);
+                        console.log(activities);
                     }
                 }),
             ]);
@@ -116,20 +173,31 @@
     };
 
     const initPageData = (): void => {
-        name = $userData ? $userData["firstname"] : "";
+        if ($userData) {
+            name = `${$userData["firstname"]} ${$userData["lastname"]}`;
+        }
 
-        totalRunDistance =
-            $userStats && $userStats["all_run_totals"]
-                ? $userStats["all_run_totals"]["distance"]
-                : 0;
-        totalRideDistance =
-            $userStats && $userStats["all_ride_totals"]
-                ? $userStats["all_ride_totals"]["distance"]
-                : 0;
-        totalSwimDistance =
-            $userStats && $userStats["all_swim_totals"]
-                ? $userStats["all_swim_totals"]["distance"]
-                : 0;
+        if ($userStats) {
+            totalRuns = $userStats["all_run_totals"]["count"];
+            totalRunDistance = $userStats["all_run_totals"]["distance_km"];
+            totalRunTime = $userStats["all_run_totals"]["moving_time_str"];
+            totalElevationGain = $userStats["all_run_totals"]["elevation_gain"];
+            totalRideDistance = $userStats["all_ride_totals"]["distance"];
+            totalSwimDistance = $userStats["all_swim_totals"]["distance"];
+            longestRunDistance = $userStats["biggest_run_distance"];
+
+            if (totalRuns && totalRunDistance) {
+                avgRunDistance = parseFloat(
+                    (totalRunDistance / totalRuns).toFixed(1),
+                );
+
+                totalAverageSpeed =
+                    $userStats["all_run_totals"]["total_average_speed"];
+            }
+
+            totalRideDistance = $userStats["all_ride_totals"]["distance"];
+            totalSwimDistance = $userStats["all_swim_totals"]["distance"];
+        }
     };
 
     onMount(async () => {
@@ -170,25 +238,106 @@
                 class="user-image"
             />
             <div class="user-info">
-                <h2 class="user-name">{$userData?.firstname}</h2>
+                <h2 class="user-name">{name}</h2>
                 <div class="user-stats">
-                    <p>Total Runs: {$userStats?.all_run_totals.count}</p>
-                    {#if totalRunDistance > 0}
+                    <p>Total Runs: {totalRuns}</p>
+                    {#if totalRunDistance}
                         <p>Total Run Distance: {totalRunDistance} km</p>
                     {/if}
-                    <p>
-                        Total Running Time: {$userStats?.all_run_totals
-                            .moving_time}
-                    </p>
+                    {#if totalRunTime}
+                        <p>
+                            Total Running Time: {totalRunTime}
+                        </p>
+                    {/if}
+                    {#if totalElevationGain > 0}
+                        <p>
+                            Total Elevation Gain: {totalElevationGain} m (or {(
+                                totalElevationGain / mountEverestHeight
+                            ).toFixed(1)} Mt Everest's)
+                        </p>
+                    {/if}
+                    {#if avgRunDistance}
+                        <p>Average Run Distance: {avgRunDistance} km</p>
+                    {/if}
+                    {#if longestRunDistance}
+                        <p>Longest Run: {longestRunDistance} m</p>
+                    {/if}
+                    {#if totalAverageSpeed}
+                        <p>Average Speed: {totalAverageSpeed} min/km</p>
+                    {/if}
                 </div>
             </div>
         </div>
-    {/if}
 
-    <!-- Add your page content here -->
+        <div>
+            <h2>Activities</h2>
+            {#each $userActivities as activity}
+                <div class="activity">
+                    <div class="activity-title">
+                        <h3 class="activity-name">{activity.name} -</h3>
+                        <p class="mirror">{getTypeIcon(activity.sport_type)}</p>
+                    </div>
+                    <div class="activity-date">
+                        <p>
+                            {activity.start_date_local_formatted} at {activity.start_time_local}
+                        </p>
+                    </div>
+                    <div class="activity-details">
+                        <span
+                            >{(activity.distance / 1000).toFixed(1)} km @ {activity.average_speed_km}
+                            min/km | {activity.moving_time_str}</span
+                        >
+                    </div>
+                    <p>{activity.total_elevation_gain}</p>
+                    <p>{activity.start_latlng}</p>
+                    <p>{activity.end_latlng}</p>
+                    <p>{activity.map}</p>
+                    <p>{activity.workout_type}</p>
+                    <p>{activity.max_speed}</p>
+                    <p>{activity.gear_id}</p>
+                </div>
+            {/each}
+        </div>
+    {/if}
 </main>
 
 <style>
+    .mirror {
+        transform: scaleX(-1);
+        display: inline-block;
+        font-size: 1.5em;
+        margin-left: 0.5rem;
+    }
+
+    .activity-details {
+        text-align: left;
+        display: flex;
+        justify-content: space-between;
+    }
+    .activity-date {
+        text-align: left;
+        padding-top: 0;
+        margin-top: 0;
+        opacity: 0.65;
+        font-size: small;
+    }
+    .activity-title {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    .activity-name {
+        text-align: left;
+        margin-bottom: 0;
+        font-weight: bold;
+    }
+    .activity {
+        border: 1px solid var(--dot-color);
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+    }
     .spinner {
         width: 60px;
         display: flex;
