@@ -1,4 +1,5 @@
-import { testAuthGetter, getUserData } from "$lib/server/data";
+import { testAuthGetter } from "$lib/server/data";
+import { getUserStats } from "../../../utils.js";
 
 export async function load({ url }) {
     let code = url.searchParams.get('code');
@@ -7,12 +8,14 @@ export async function load({ url }) {
 
     if (code) {
         const tokens = await testAuthGetter(code);
+        console.log(tokens);
+        
         const accessToken = tokens.access_token;
         const userId = tokens.athlete.id;
 
-        const userStats = await getUserData(userId, accessToken);
+        const userStats = await getUserStats(userId, accessToken);
 
-        if (userStats) {
+        if (userStats) {            
             return {
                 userStats: userStats.data,
                 userData: tokens,

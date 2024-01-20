@@ -22,7 +22,11 @@
     onMount(async () => {
         try {
             if (data.userData) {
-                userData.set(data.userData);
+                userData.set(data.userData.athlete);
+                localStorage.setItem("expires_at", data.userData.expires_at);
+                localStorage.setItem("refresh_token", data.userData.refresh_token);
+                localStorage.setItem("access_token", data.userData.access_token);
+                localStorage.setItem("user_id", data.userData.athlete.id);
             } 
 
             if (data.userStats) {
