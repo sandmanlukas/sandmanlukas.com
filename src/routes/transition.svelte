@@ -6,7 +6,7 @@
 </script>
 
 {#key key}
-  <div in:slide={{ duration, delay: duration }} out:slide={{ duration }}>
+  <div in:slide|global={{ duration, delay: duration }} out:slide|global={{ duration }}>
     <slot/>
   </div>
 {/key}

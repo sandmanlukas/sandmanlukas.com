@@ -1,5 +1,5 @@
 // import adapter from '@sveltejs/adapter-auto';
-import { vitePreprocess } from '@sveltejs/kit/vite';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import adapter from '@sveltejs/adapter-static';
 
 
@@ -11,7 +11,11 @@ const config = {
 
 	kit: {
 		env: {
-			dir:'./'
+			dir: './'
+		},
+		prerender:
+		{
+			entries: ['*'],
 		},
 		// adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.
 		// If your environment is not supported or you settled on a specific environment, switch out the adapter.
