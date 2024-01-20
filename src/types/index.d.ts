@@ -96,3 +96,26 @@ export type Activity = {
     has_kudoed: boolean;
 }
 
+type Totals = {
+    count: number;
+    distance: number;
+    moving_time: number | string;
+    elapsed_time: number | string;
+    elevation_gain: number;
+    achievement_count?: number;
+};
+
+export type UserStats = {
+    biggest_ride_distance: null | number;
+    biggest_climb_elevation_gain: null | number;
+    recent_ride_totals: Totals;
+    all_ride_totals: Totals;
+    recent_run_totals: Totals;
+    all_run_totals: Totals;
+    recent_swim_totals: Totals;
+    all_swim_totals: Totals;
+    ytd_ride_totals: Totals;
+    ytd_run_totals: Totals;
+    ytd_swim_totals: Totals;
+};
+

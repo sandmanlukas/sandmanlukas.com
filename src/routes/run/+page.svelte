@@ -1,6 +1,7 @@
 <script lang="ts">
     import { userData, userStats, userActivities } from "../../store";
     import {
+        convertSeconds,
         getUserActivities,
         getUserData,
         getUserStats,
@@ -8,6 +9,7 @@
     } from "../../utils";
     import { PUBLIC_CLIENT_ID } from "$env/static/public";
     import { onMount } from "svelte";
+    import type { Totals, UserStats } from "../../types";
 
     let uri = "";
     let name = "";
@@ -59,6 +61,31 @@
         }
     };
 
+    const formatStats = (stats: UserStats) => {
+        const newStats = { ...stats };
+
+        for (const key in stats) {
+            if (
+                typeof newStats[key as keyof UserStats] === "object" &&
+                newStats[key as keyof UserStats] !== null
+            ) {
+                // Convert distance to km
+                const statObject = newStats[key as keyof UserStats] as Totals;
+                if (statObject) {
+                    statObject.distance = parseFloat(
+                        (statObject.distance / 1000).toFixed(1),
+                    );
+                    statObject.elapsed_time = convertSeconds(
+                        statObject.elapsed_time as number,
+                    );
+                    statObject.moving_time = convertSeconds(
+                        statObject.moving_time as number,
+                    );
+                }
+            }
+        }
+        return newStats;
+    };
     const updateUserDataAndStats = async (
         userId: string,
         accessToken: string,
@@ -72,12 +99,14 @@
                 }),
                 getUserStats(userId, accessToken).then((data) => {
                     if (data) {
-                        userStats.set(data.data);
+                        const stats = formatStats(data.data);
+                        userStats.set(stats);
                     }
                 }),
                 getUserActivities(accessToken).then((data) => {
                     if (data) {
                         userActivities.set(data);
+                        console.log(data);
                     }
                 }),
             ]);
@@ -101,10 +130,6 @@
             $userStats && $userStats["all_swim_totals"]
                 ? $userStats["all_swim_totals"]["distance"]
                 : 0;
-
-        totalRunDistance = parseFloat((totalRunDistance / 1000).toFixed(1));
-        totalRideDistance = parseFloat((totalRideDistance / 1000).toFixed(1));
-        totalSwimDistance = parseFloat((totalSwimDistance / 1000).toFixed(1));
     };
 
     onMount(async () => {
@@ -120,7 +145,14 @@
 </script>
 
 <main>
-    {#if loading}
+    {#if $userData === null && $userStats === null && $userActivities.length === 0}
+        <div class="centered">
+            <p>Visualize your Strava data by pressing the button below.</p>
+            <button on:click={() => handleLogin(uri)}
+                >Connect with Strava</button
+            >
+        </div>
+    {:else if loading}
         <div class="centered">
             <p>Fetching your data...</p>
             <div class="spinner">
@@ -129,30 +161,27 @@
                 <div class="dot"></div>
             </div>
         </div>
-    {/if}
-
-    {#if $userData === null && $userStats === null && $userActivities === null}
-        <div class="centered">
-            <p>Visualize your Strava data by pressing the button below.</p>
-            <button on:click={() => handleLogin(uri)}
-                >Connect with Strava</button
-            >
-        </div>
-    {:else}
-        <div>
-            {#if name}
-                <h2>Hi, {name}!</h2>
-            {/if}
-
-            {#if totalRunDistance > 0}
-                <p>Total run distance: {totalRunDistance} km</p>
-            {/if}
-            {#if totalRideDistance > 0}
-                <p>Total ride distance: {totalRideDistance} km</p>
-            {/if}
-            {#if totalSwimDistance > 0}
-                <p>Total swim distance: {totalSwimDistance} km</p>
-            {/if}
+    {:else if $userData && $userStats && $userActivities}
+        <div class="user-card">
+            <img
+                src={$userData?.profile_medium}
+                alt="User profile image"
+                aria-hidden="true"
+                class="user-image"
+            />
+            <div class="user-info">
+                <h2 class="user-name">{$userData?.firstname}</h2>
+                <div class="user-stats">
+                    <p>Total Runs: {$userStats?.all_run_totals.count}</p>
+                    {#if totalRunDistance > 0}
+                        <p>Total Run Distance: {totalRunDistance} km</p>
+                    {/if}
+                    <p>
+                        Total Running Time: {$userStats?.all_run_totals
+                            .moving_time}
+                    </p>
+                </div>
+            </div>
         </div>
     {/if}
 
@@ -212,6 +241,36 @@
         margin: 1rem;
         cursor: pointer;
         border-radius: 10px;
+    }
+
+    .user-card {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        border: 1px solid var(--dot-color);
+        border-radius: 10px;
+    }
+
+    .user-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin-right: 20px;
+    }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-stats {
+        margin-top: 10px;
+        text-align: left;
+    }
+
+    .user-name {
+        text-align: left;
+        font-weight: bold;
     }
     /* Add your styles here */
 </style>

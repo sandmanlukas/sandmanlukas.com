@@ -41,7 +41,6 @@
 </script>
 
 <main>
-    <div>Loading...</div>
 </main>
 
 <style>
