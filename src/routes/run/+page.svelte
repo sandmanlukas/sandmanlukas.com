@@ -204,7 +204,9 @@
         uri = window.location.host;
 
         try {
-            await handleTokenExpiration();
+            if ($userData === null && $userStats === null && $userActivities.length === 0) {
+                await handleTokenExpiration();
+            }
             initPageData();
         } catch (error) {
             console.log(error);
