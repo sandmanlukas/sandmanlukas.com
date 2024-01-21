@@ -1,6 +1,5 @@
 import axios from "axios";
 import type { ActivitiesRequest, Activity } from "./types";
-import { fakeUserStats, fakeActivities, fakeAthlete } from './fakeData';
 
 export const getUserStats = async (userID: string, accessToken: string) => {
     try {
