@@ -1,8 +1,11 @@
-import axios, { all } from "axios";
+import axios from "axios";
 import type { ActivitiesRequest, Activity } from "./types";
+import { fakeUserStats, fakeActivities, fakeAthlete } from './fakeData';
 
 export const getUserStats = async (userID: string, accessToken: string) => {
     try {
+
+        return { data: fakeUserStats };
         const response = await axios.get(
             `https://www.strava.com/api/v3/athletes/${userID}/stats`,
             { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -18,6 +21,7 @@ export const getUserActivities = async (accessToken: string, before = "", after 
     let page = 1;
     let allActivities: Activity[] = [];
 
+    return fakeActivities;
     do {
         const params: ActivitiesRequest = {
             per_page: perPage,
@@ -57,6 +61,7 @@ export const getUserActivities = async (accessToken: string, before = "", after 
 
 export const getUserData = async (accessToken: string) => {
     try {
+        return { data: fakeAthlete };
         const response = await axios.get(
             `https://www.strava.com/api/v3/athlete`,
             { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -93,6 +98,15 @@ export const convertSeconds = (seconds: number): string => {
     } else {
         return `${minutes}m`
     }
+}
+
+export const computePace = (time: number, distance: number): string => {
+    var pace = (time / distance / 60) * 1000;
+    var leftover = pace % 1;
+    var minutes = pace - leftover;
+    var seconds: string | number = Math.round(leftover * 60);
+    seconds = seconds < 10 ? `0${seconds}` : seconds;
+    return `${minutes}:${seconds}`;
 }
 
 export const getTypeIcon = (type: string): string => {
@@ -174,5 +188,18 @@ export function formatTime(date: Date): string {
     return date.toLocaleTimeString("sv-SE", {
         hour: "numeric",
         minute: "numeric",
+    });
+}
+
+export function filterActivitiesByType(activities: Activity[], type: string): Activity[] {
+    return activities.filter((activity) => activity.sport_type === type);
+}
+
+export function filterActivitiesByDate(activities: Activity[] = [], startDate: Date, endDate: Date): Activity[] {
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+    return activities.filter((activity) => {
+        const activityDate = new Date(activity.start_date_local);
+        return activityDate >= startDate && activityDate <= endDate;
     });
 }

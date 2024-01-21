@@ -1,7 +1,11 @@
 <script lang="ts">
     import { userData, userStats, userActivities } from "../../store";
+    import type { Activity, Totals, UserStats } from "../../types";
     import {
+        computePace,
         convertSeconds,
+        filterActivitiesByDate,
+        filterActivitiesByType,
         formatDate,
         formatTime,
         getTypeIcon,
@@ -12,7 +16,12 @@
     } from "../../utils";
     import { PUBLIC_CLIENT_ID } from "$env/static/public";
     import { onMount } from "svelte";
-    import type { Activity, Totals, UserStats } from "../../types";
+
+    import Flatpickr from "svelte-flatpickr";
+
+    import "@fortawesome/fontawesome-free/css/all.min.css";
+    import "flatpickr/dist/flatpickr.css";
+    
 
     const mountEverestHeight = 8848;
 
@@ -23,10 +32,85 @@
     let longestRunDistance: number | null = 0;
     let totalRunDistance: number | undefined = 0;
     let totalRunTime: string | undefined = "";
-    let totalAverageSpeed: number | undefined = 0;
+    let totalAverageSpeed: string | undefined = "";
     let totalElevationGain = 0;
     let totalRideDistance = 0;
     let totalSwimDistance = 0;
+
+    let filterType = "";
+
+    let filterDateRange: Date[] = [];
+
+    let filteredActivities: Activity[] = [];
+    let activityTypes: string[] = [];
+
+    let firstDate: string;
+    let lastDate: string;
+
+    let options = {
+        enableTime: false,
+        mode: "range" as const,
+        dateFormat: "Y-m-d",
+        onChange: (selectedDates: Date[]) => {
+            filterDateRange = selectedDates;
+        },
+        minDate: "",
+        maxDate: "",
+    };
+
+    $: if ($userActivities.length > 0) {
+        activityTypes = [...new Set($userActivities.map((a) => a.sport_type))];
+        filteredActivities = $userActivities;
+
+        // If there is a filter, filter the activities
+        if (filterType) {
+            filteredActivities = filterActivitiesByType(
+                filteredActivities,
+                filterType,
+            );
+        }
+
+        // If there is a date filter, filter the activities
+        if (filterDateRange.length > 0) {
+            let firstDateFilter = filterDateRange[0];
+            let lastDateFilter = filterDateRange[1];
+
+            // If the user selects two dates, filter by those dates, else filter by firstDate only
+            if (firstDateFilter && lastDateFilter) {
+                filteredActivities = filterActivitiesByDate(
+                    filteredActivities,
+                    firstDateFilter,
+                    lastDateFilter,
+                );
+            }
+        }
+
+        // Get first and lastDate if not set
+        if (!firstDate && !lastDate) {
+            const sortedActivities = filteredActivities.sort(
+                (a, b) =>
+                    new Date(b.start_date_local).getTime() -
+                    new Date(a.start_date_local).getTime(),
+            );
+
+            if (sortedActivities.length > 0) {
+                firstDate = new Date(
+                    sortedActivities[
+                        sortedActivities.length - 1
+                    ].start_date_local,
+                )
+                    .toISOString()
+                    .slice(0, 10);
+                lastDate = new Date(sortedActivities[0].start_date_local)
+                    .toISOString()
+                    .slice(0, 10);
+            }
+            options["minDate"] = firstDate;
+            options["maxDate"] = lastDate;
+        }
+    }
+
+    let stravaActivityURL = "https://www.strava.com/activities/";
 
     let loading = true;
 
@@ -94,14 +178,17 @@
             activity.moving_time_str = convertSeconds(activity.moving_time);
             activity.elapsed_time_str = convertSeconds(activity.elapsed_time);
 
-            // Convert distance to km, 1m/s = 0.06km/min
-            activity.average_speed_km = parseFloat(
-                (activity.average_speed * 0.06).toFixed(2),
+            // Compute pace in min/km
+            activity.average_pace = computePace(
+                activity.moving_time,
+                activity.distance,
             );
         }
 
         if ($userStats) {
-            $userStats["biggest_run_distance"] = parseFloat((longestRun / 1000).toFixed(1));
+            $userStats["longest_run_distance"] = parseFloat(
+                (longestRun / 1000).toFixed(1),
+            );
         }
         return newActivities;
     };
@@ -124,11 +211,16 @@
                         (statObject.moving_time / 60).toFixed(1),
                     );
 
-                    const totalAverageSpeed = parseFloat(
-                        (totalTimeInMinutes / totalDistanceInKm).toFixed(2),
-                    );
+                    var pace =
+                        (statObject.moving_time / statObject.distance / 60) *
+                        1000;
+                    var leftover = pace % 1;
+                    var minutes = pace - leftover;
+                    var seconds: string | number = Math.round(leftover * 60);
+                    seconds = seconds < 10 ? `0${seconds}` : seconds;
+                    var paceStr = `${minutes}:${seconds}`;
 
-                    statObject.total_average_speed = totalAverageSpeed;
+                    statObject.total_average_speed = paceStr;
                     statObject.distance_km = totalDistanceInKm;
 
                     statObject.elapsed_time_str = convertSeconds(
@@ -163,7 +255,6 @@
                     if (data) {
                         const activities = formatActivities(data);
                         userActivities.set(activities);
-                        console.log(activities);
                     }
                 }),
             ]);
@@ -184,7 +275,9 @@
             totalElevationGain = $userStats["all_run_totals"]["elevation_gain"];
             totalRideDistance = $userStats["all_ride_totals"]["distance"];
             totalSwimDistance = $userStats["all_swim_totals"]["distance"];
-            longestRunDistance = $userStats["biggest_run_distance"];
+            longestRunDistance = $userStats["longest_run_distance"]
+                ? $userStats["longest_run_distance"]
+                : 0;
 
             if (totalRuns && totalRunDistance) {
                 avgRunDistance = parseFloat(
@@ -204,7 +297,11 @@
         uri = window.location.host;
 
         try {
-            if ($userData === null && $userStats === null && $userActivities.length === 0) {
+            if (
+                $userData === null &&
+                $userStats === null &&
+                $userActivities.length === 0
+            ) {
                 await handleTokenExpiration();
             }
             initPageData();
@@ -262,7 +359,7 @@
                         <p>Average Run Distance: {avgRunDistance} km</p>
                     {/if}
                     {#if longestRunDistance}
-                        <p>Longest Run: {longestRunDistance} m</p>
+                        <p>Longest Run: {longestRunDistance} km</p>
                     {/if}
                     {#if totalAverageSpeed}
                         <p>Average Speed: {totalAverageSpeed} min/km</p>
@@ -272,33 +369,61 @@
         </div>
 
         <div>
-            <h2>Activities</h2>
-            {#each $userActivities as activity}
-                <div class="activity">
-                    <div class="activity-title">
-                        <h3 class="activity-name">{activity.name} -</h3>
-                        <p class="mirror">{getTypeIcon(activity.sport_type)}</p>
+            <h2 class="activity-container-title">Activities</h2>
+            <div class="filter-form">
+                <select bind:value={filterType}>
+                    <option value="">All types</option>
+                    {#each activityTypes as type}
+                        <option value={type}>{type}</option>
+                    {/each}
+                </select>
+                <Flatpickr
+                    {options}
+                    bind:value={filterDateRange}
+                    placeholder="Select a date or range."
+                    class="date-picker"
+                >
+            </Flatpickr>
+            </div>
+            <div class="activities-container">
+                {#each filteredActivities as activity}
+                    <div class="activity">
+                        <div class="activity-title">
+                            <a href={`${stravaActivityURL}/${activity.id}`}
+                                ><h3 class="activity-name">
+                                    {activity.name}
+                                </h3></a
+                            ><span>&nbsp;-&nbsp;</span>
+                            <p class="mirror">
+                                {getTypeIcon(activity.sport_type)}
+                            </p>
+                        </div>
+                        <div class="activity-date">
+                            <p>
+                                {activity.start_date_local_formatted} at {activity.start_time_local}
+                            </p>
+                        </div>
+                        <div class="activity-details">
+                            <span>
+                                <i class="fas fa-route"></i>
+                                {(activity.distance / 1000).toFixed(1)} km
+                                <span class="divider">|</span>
+                                <i class="fas fa-tachometer-alt"></i>
+                                {activity.average_pace} min/km
+                                <span class="divider">|</span>
+                                <i class="fas fa-clock"></i>
+                                {activity.moving_time_str}
+                                <span class="divider">|</span>
+                                <i class="fas fa-mountain"></i>
+                                {activity.total_elevation_gain} m
+                            </span>
+                        </div>
+                        <!-- <p>{activity.start_latlng}</p>
+                        <p>{activity.end_latlng}</p>
+                        <p>{activity.map}</p> -->
                     </div>
-                    <div class="activity-date">
-                        <p>
-                            {activity.start_date_local_formatted} at {activity.start_time_local}
-                        </p>
-                    </div>
-                    <div class="activity-details">
-                        <span
-                            >{(activity.distance / 1000).toFixed(1)} km @ {activity.average_speed_km}
-                            min/km | {activity.moving_time_str}</span
-                        >
-                    </div>
-                    <p>{activity.total_elevation_gain}</p>
-                    <p>{activity.start_latlng}</p>
-                    <p>{activity.end_latlng}</p>
-                    <p>{activity.map}</p>
-                    <p>{activity.workout_type}</p>
-                    <p>{activity.max_speed}</p>
-                    <p>{activity.gear_id}</p>
-                </div>
-            {/each}
+                {/each}
+            </div>
         </div>
     {/if}
 </main>
@@ -309,6 +434,60 @@
         display: inline-block;
         font-size: 1.5em;
         margin-left: 0.5rem;
+    }
+
+    .divider {
+        margin: 0 0.1rem;
+        opacity: 0.5;
+    }
+/* 
+    .filter-form input {
+        background-color: red;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    }
+
+    .date-picker .flatpickr-day.selected,
+    .date-picker .flatpickr-day.startRange,
+    .date-picker .flatpickr-day.endRange {
+        background-color: var(--dot-color);
+        color: #ffffff;
+    } */
+
+    .flatpickr-calendar {
+        background-color: red;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        align-items: center;
+    }
+
+    .filter-form select,
+    .filter-form input {
+        padding: 0.5rem;
+        border: 1px solid var(--dot-color);
+        color: var(--dot-color);
+        background-color: inherit;
+        border-radius: 4px;
+        height: 40px;
+        /* font-size: 1rem; */
+    }
+
+    .activities-container {
+        width: 55%;
+        height: 500px;
+        overflow-y: auto;
+    }
+
+    .activity-container-title {
+        text-align: left;
+        margin-top: 2rem;
+        margin-bottom: 0;
+        font-size: large;
+        font-weight: bold;
     }
 
     .activity-details {

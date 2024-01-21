@@ -21,6 +21,12 @@ export type Athlete = {
     follower: string | null;
 };
 
+type ActivityAthlete = {
+    id: number;
+    resource_state: number;
+};
+
+
 export type TokenData = {
     token_type: string;
     expires_at: number;
@@ -45,7 +51,7 @@ export type Map = {
 
 export type Activity = {
     resource_state: number;
-    athlete: Athlete;
+    athlete: ActivityAthlete;
     name: string;
     distance: number;
     moving_time: number;
@@ -55,7 +61,7 @@ export type Activity = {
     total_elevation_gain: number;
     type: string;
     sport_type: string;
-    workout_type: null | string;
+    workout_type?: null | number;
     id: number;
     start_date: string;
     start_date_formatted?: string;
@@ -80,23 +86,24 @@ export type Activity = {
     private: boolean;
     visibility: string;
     flagged: boolean;
-    gear_id: string;
+    gear_id: string | null;
     start_latlng: number[];
     end_latlng: number[];
     average_speed: number;
-    average_speed_km?: number;
+    average_pace?: string;
     max_speed: number;
-    average_cadence: number;
+    max_pace?: string;
+    average_cadence?: number;
     has_heartrate: boolean;
-    average_heartrate: number;
-    max_heartrate: number;
+    average_heartrate?: number;
+    max_heartrate?: number;
     heartrate_opt_out: boolean;
     display_hide_heartrate_option: boolean;
-    elev_high: number;
-    elev_low: number;
-    upload_id: number;
-    upload_id_str: string;
-    external_id: string;
+    elev_high?: number;
+    elev_low?: number;
+    upload_id: null | number;
+    upload_id_str?: string;
+    external_id: null | string;
     from_accepted_tag: boolean;
     pr_count: number;
     total_photo_count: number;
@@ -113,13 +120,13 @@ type Totals = {
     elapsed_time_str?: string;
     elevation_gain: number;
     achievement_count?: number;
-    total_average_speed?: number;
+    total_average_speed?: string;
 
 };
 
 export type UserStats = {
     biggest_ride_distance: null | number;
-    biggest_run_distance: null | number;
+    longest_run_distance?: null | number;
     biggest_climb_elevation_gain: null | number;
     recent_ride_totals: Totals;
     all_ride_totals: Totals;
