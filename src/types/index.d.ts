@@ -1,3 +1,5 @@
+declare module 'leaflet';
+
 export type Athlete = {
     id: number;
     username: string;
@@ -127,6 +129,7 @@ type Totals = {
 export type UserStats = {
     biggest_ride_distance: null | number;
     longest_run_distance?: null | number;
+    longest_run_streak?: number;
     biggest_climb_elevation_gain: null | number;
     recent_ride_totals: Totals;
     all_ride_totals: Totals;

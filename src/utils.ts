@@ -5,7 +5,6 @@ import { fakeUserStats, fakeActivities, fakeAthlete } from './fakeData';
 export const getUserStats = async (userID: string, accessToken: string) => {
     try {
 
-        return { data: fakeUserStats };
         const response = await axios.get(
             `https://www.strava.com/api/v3/athletes/${userID}/stats`,
             { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -21,7 +20,6 @@ export const getUserActivities = async (accessToken: string, before = "", after 
     let page = 1;
     let allActivities: Activity[] = [];
 
-    return fakeActivities;
     do {
         const params: ActivitiesRequest = {
             per_page: perPage,
@@ -61,7 +59,6 @@ export const getUserActivities = async (accessToken: string, before = "", after 
 
 export const getUserData = async (accessToken: string) => {
     try {
-        return { data: fakeAthlete };
         const response = await axios.get(
             `https://www.strava.com/api/v3/athlete`,
             { headers: { Authorization: `Bearer ${accessToken}` } }

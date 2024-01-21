@@ -21,7 +21,7 @@
 
     import "@fortawesome/fontawesome-free/css/all.min.css";
     import "flatpickr/dist/flatpickr.css";
-    
+    import Leaflet from "$lib/Leaflet.svelte";
 
     const mountEverestHeight = 8848;
 
@@ -30,10 +30,14 @@
     let totalRuns = 0;
     let avgRunDistance = 0;
     let longestRunDistance: number | null = 0;
+    let longestStreak: number = 0;
     let totalRunDistance: number | undefined = 0;
     let totalRunTime: string | undefined = "";
     let totalAverageSpeed: string | undefined = "";
     let totalElevationGain = 0;
+
+    let activeActivityIndex = 0;
+
     let totalRideDistance = 0;
     let totalSwimDistance = 0;
 
@@ -120,6 +124,10 @@
         window.location.href = `http://www.strava.com/oauth/authorize?client_id=${PUBLIC_CLIENT_ID}&response_type=code&redirect_uri=${redirectUrl}/exchange_token&approval_prompt=force&scope=${scope}`;
     };
 
+    const handleActivityClick = (index: number) => {
+        activeActivityIndex = index;
+    };
+
     const handleTokenExpiration = async () => {
         const expiresAtStr = localStorage.getItem("expires_at");
         const expiresAt = expiresAtStr ? parseInt(expiresAtStr) : null;
@@ -160,6 +168,10 @@
         const newActivities = [...activities];
 
         let longestRun = 0;
+        let currentRunStreak = 0;
+        let longestStreak = 0;
+        let previousDate: Date | null = null;
+
         for (const activity of newActivities) {
             if (
                 activity.sport_type === "Run" &&
@@ -167,6 +179,24 @@
             ) {
                 longestRun = activity.distance;
             }
+
+            // Calculate the longest run streak
+            const currentDate = new Date(activity.start_date_local);
+            currentDate.setHours(0, 0, 0, 0);
+
+            if (previousDate) {
+                const diffDays = Math.round(
+                    (previousDate.getTime() - currentDate.getTime()) /
+                        (1000 * 60 * 60 * 24),
+                );
+                if (diffDays === 1) {
+                    currentRunStreak++;
+                } else if (diffDays > 1) {
+                    currentRunStreak = 0;
+                }
+            }
+            longestStreak = Math.max(longestStreak, currentRunStreak);
+            previousDate = currentDate;
 
             const startDate = new Date(activity.start_date);
             const startDateLocal = new Date(activity.start_date_local);
@@ -189,6 +219,8 @@
             $userStats["longest_run_distance"] = parseFloat(
                 (longestRun / 1000).toFixed(1),
             );
+
+            $userStats["longest_run_streak"] = longestStreak;
         }
         return newActivities;
     };
@@ -278,6 +310,9 @@
             longestRunDistance = $userStats["longest_run_distance"]
                 ? $userStats["longest_run_distance"]
                 : 0;
+            longestStreak = $userStats["longest_run_streak"]
+                ? $userStats["longest_run_streak"]
+                : 0;
 
             if (totalRuns && totalRunDistance) {
                 avgRunDistance = parseFloat(
@@ -338,32 +373,44 @@
             />
             <div class="user-info">
                 <h2 class="user-name">{name}</h2>
-                <div class="user-stats">
-                    <p>Total Runs: {totalRuns}</p>
-                    {#if totalRunDistance}
-                        <p>Total Run Distance: {totalRunDistance} km</p>
-                    {/if}
-                    {#if totalRunTime}
-                        <p>
-                            Total Running Time: {totalRunTime}
-                        </p>
-                    {/if}
-                    {#if totalElevationGain > 0}
-                        <p>
-                            Total Elevation Gain: {totalElevationGain} m (or {(
-                                totalElevationGain / mountEverestHeight
-                            ).toFixed(1)} Mt Everest's)
-                        </p>
-                    {/if}
-                    {#if avgRunDistance}
-                        <p>Average Run Distance: {avgRunDistance} km</p>
-                    {/if}
-                    {#if longestRunDistance}
-                        <p>Longest Run: {longestRunDistance} km</p>
-                    {/if}
-                    {#if totalAverageSpeed}
-                        <p>Average Speed: {totalAverageSpeed} min/km</p>
-                    {/if}
+
+                <div class="user-info-grid">
+                    <div class="user-stats">
+                        <p>Total Runs: {totalRuns}</p>
+                        {#if totalRunDistance}
+                            <p>Total Run Distance: {totalRunDistance} km</p>
+                        {/if}
+                        {#if totalRunTime}
+                            <p>
+                                Total Running Time: {totalRunTime}
+                            </p>
+                        {/if}
+                        {#if totalElevationGain > 0}
+                            <p>
+                                Total Elevation Gain: {totalElevationGain} m (or
+                                {(
+                                    totalElevationGain / mountEverestHeight
+                                ).toFixed(1)} Mt Everest's)
+                            </p>
+                        {/if}
+                    </div>
+
+                    <div class="user-stats">
+                        {#if avgRunDistance}
+                            <p>Average Run Distance: {avgRunDistance} km</p>
+                        {/if}
+                        {#if totalAverageSpeed}
+                            <p>Average Speed: {totalAverageSpeed} min/km</p>
+                        {/if}
+                        {#if longestRunDistance}
+                            <p>Longest Run: {longestRunDistance} km</p>
+                        {/if}
+                        {#if longestStreak}
+                            <p class="font-bold">
+                                Longest Streak: {longestStreak} days
+                            </p>
+                        {/if}
+                    </div>
                 </div>
             </div>
         </div>
@@ -381,54 +428,85 @@
                     {options}
                     bind:value={filterDateRange}
                     placeholder="Select a date or range."
-                    class="date-picker"
-                >
-            </Flatpickr>
+                    size={23}
+                ></Flatpickr>
+                {#if filterDateRange.length > 0}
+                    <button
+                        class="clear-filter"
+                        on:click={() => (filterDateRange = [])}
+                        ><i class="fas fa-times"></i></button
+                    >
+                {/if}
             </div>
-            <div class="activities-container">
-                {#each filteredActivities as activity}
-                    <div class="activity">
-                        <div class="activity-title">
-                            <a href={`${stravaActivityURL}/${activity.id}`}
-                                ><h3 class="activity-name">
-                                    {activity.name}
-                                </h3></a
-                            ><span>&nbsp;-&nbsp;</span>
-                            <p class="mirror">
-                                {getTypeIcon(activity.sport_type)}
-                            </p>
-                        </div>
-                        <div class="activity-date">
-                            <p>
-                                {activity.start_date_local_formatted} at {activity.start_time_local}
-                            </p>
-                        </div>
-                        <div class="activity-details">
-                            <span>
-                                <i class="fas fa-route"></i>
-                                {(activity.distance / 1000).toFixed(1)} km
-                                <span class="divider">|</span>
-                                <i class="fas fa-tachometer-alt"></i>
-                                {activity.average_pace} min/km
-                                <span class="divider">|</span>
-                                <i class="fas fa-clock"></i>
-                                {activity.moving_time_str}
-                                <span class="divider">|</span>
-                                <i class="fas fa-mountain"></i>
-                                {activity.total_elevation_gain} m
-                            </span>
-                        </div>
-                        <!-- <p>{activity.start_latlng}</p>
-                        <p>{activity.end_latlng}</p>
-                        <p>{activity.map}</p> -->
-                    </div>
-                {/each}
+            <div class="activities-grid">
+                <div class="activities-container">
+                    {#each filteredActivities as activity, index (activity.id)}
+                        <button
+                            class="activity-button"
+                            on:click={() => handleActivityClick(index)}
+                        >
+                            <div class="activity">
+                                <div class="activity-title">
+                                    <a
+                                        href={`${stravaActivityURL}/${activity.id}`}
+                                        ><h3 class="activity-name">
+                                            {activity.name}
+                                        </h3></a
+                                    ><span>&nbsp;-&nbsp;</span>
+                                    <p class="mirror">
+                                        {getTypeIcon(activity.sport_type)}
+                                    </p>
+                                </div>
+                                <div class="activity-date">
+                                    <p>
+                                        {activity.start_date_local_formatted} at
+                                        {activity.start_time_local}
+                                    </p>
+                                </div>
+                                <div class="activity-details">
+                                    <span>
+                                        <i class="fas fa-route"></i>
+                                        {(activity.distance / 1000).toFixed(1)} km
+                                        <span class="divider">|</span>
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        {activity.average_pace} min/km
+                                        <span class="divider">|</span>
+                                        <i class="fas fa-clock"></i>
+                                        {activity.moving_time_str}
+                                        <span class="divider">|</span>
+                                        <i class="fas fa-mountain"></i>
+                                        {activity.total_elevation_gain} m
+                                    </span>
+                                </div>
+                            </div>
+                        </button>
+                    {/each}
+                </div>
+                {#if filteredActivities.length > 0 && filteredActivities[activeActivityIndex].map.summary_polyline}
+                    <Leaflet
+                        view={filteredActivities[activeActivityIndex]
+                            .start_latlng}
+                        encodedPolyline={filteredActivities[activeActivityIndex]
+                            .map.summary_polyline}
+                        zoom={13}
+                    ></Leaflet>
+                {:else}
+                    <p>No map data for this activity :(</p>
+                {/if}
             </div>
         </div>
     {/if}
 </main>
 
 <style>
+    .clear-filter {
+        background-color: transparent;
+        border: none;
+        color: var(--dot-color);
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+    }
     .mirror {
         transform: scaleX(-1);
         display: inline-block;
@@ -440,23 +518,6 @@
         margin: 0 0.1rem;
         opacity: 0.5;
     }
-/* 
-    .filter-form input {
-        background-color: red;
-        border-radius: 5px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-    }
-
-    .date-picker .flatpickr-day.selected,
-    .date-picker .flatpickr-day.startRange,
-    .date-picker .flatpickr-day.endRange {
-        background-color: var(--dot-color);
-        color: #ffffff;
-    } */
-
-    .flatpickr-calendar {
-        background-color: red;
-    }
 
     .filter-form {
         display: flex;
@@ -465,8 +526,7 @@
         align-items: center;
     }
 
-    .filter-form select,
-    .filter-form input {
+    .filter-form select {
         padding: 0.5rem;
         border: 1px solid var(--dot-color);
         color: var(--dot-color);
@@ -476,8 +536,13 @@
         /* font-size: 1rem; */
     }
 
+    .activities-grid {
+        display: grid;
+        grid-template-columns: 2fr 2fr;
+        gap: 1rem;
+    }
     .activities-container {
-        width: 55%;
+        width: 100%;
         height: 500px;
         overflow-y: auto;
     }
@@ -516,8 +581,19 @@
     .activity {
         border: 1px solid var(--dot-color);
         padding: 10px;
-        margin-bottom: 10px;
         border-radius: 10px;
+        background-color: inherit;
+        color: inherit;
+    }
+    .activity-button {
+        background-color: inherit;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        margin: 0;
+        padding-left: 0;
+        padding-top: 0;
+        width: 100%;
     }
     .spinner {
         width: 60px;
@@ -591,6 +667,12 @@
     .user-info {
         display: flex;
         flex-direction: column;
+    }
+
+    .user-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
     }
 
     .user-stats {

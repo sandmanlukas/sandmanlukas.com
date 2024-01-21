@@ -145,3 +145,12 @@ button:focus:not(:focus-visible) {
 .dark {
   --dot-color: #ddd;
 }
+
+
+.map-marker-end {
+  color: #000;
+}
+
+.map-marker {
+  color: #000;
+}
