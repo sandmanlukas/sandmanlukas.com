@@ -2,6 +2,7 @@
     import { userData, userStats, userActivities } from "../../store";
     import type { Activity, Totals, UserStats } from "../../types";
     import {
+        _formatActivities,
         computePace,
         convertSeconds,
         filterActivitiesByDate,
@@ -22,6 +23,7 @@
     import "@fortawesome/fontawesome-free/css/all.min.css";
     import "flatpickr/dist/flatpickr.css";
     import Leaflet from "$lib/Leaflet.svelte";
+    import FilteredStats from "$lib/FilteredStats.svelte";
 
     const mountEverestHeight = 8848;
 
@@ -164,56 +166,9 @@
         }
     };
 
-    const formatActivities = (activities: Activity[]) => {
-        const newActivities = [...activities];
-
-        let longestRun = 0;
-        let currentRunStreak = 0;
-        let longestStreak = 0;
-        let previousDate: Date | null = null;
-
-        for (const activity of newActivities) {
-            if (
-                activity.sport_type === "Run" &&
-                activity.distance > longestRun
-            ) {
-                longestRun = activity.distance;
-            }
-
-            // Calculate the longest run streak
-            const currentDate = new Date(activity.start_date_local);
-            currentDate.setHours(0, 0, 0, 0);
-
-            if (previousDate) {
-                const diffDays = Math.round(
-                    (previousDate.getTime() - currentDate.getTime()) /
-                        (1000 * 60 * 60 * 24),
-                );
-                if (diffDays === 1) {
-                    currentRunStreak++;
-                } else if (diffDays > 1) {
-                    currentRunStreak = 0;
-                }
-            }
-            longestStreak = Math.max(longestStreak, currentRunStreak);
-            previousDate = currentDate;
-
-            const startDate = new Date(activity.start_date);
-            const startDateLocal = new Date(activity.start_date_local);
-            activity.start_date_formatted = formatDate(startDate);
-            activity.start_date_local_formatted = formatDate(startDateLocal);
-            activity.start_time = formatTime(startDate);
-            activity.start_time_local = formatTime(startDateLocal);
-
-            activity.moving_time_str = convertSeconds(activity.moving_time);
-            activity.elapsed_time_str = convertSeconds(activity.elapsed_time);
-
-            // Compute pace in min/km
-            activity.average_pace = computePace(
-                activity.moving_time,
-                activity.distance,
-            );
-        }
+    export const formatActivities = (activities: Activity[]) => {
+        const { formattedActivities, longestRun } =
+            _formatActivities(activities);
 
         if ($userStats) {
             $userStats["longest_run_distance"] = parseFloat(
@@ -222,7 +177,7 @@
 
             $userStats["longest_run_streak"] = longestStreak;
         }
-        return newActivities;
+        return formattedActivities;
     };
 
     const formatStats = (stats: UserStats) => {
@@ -364,7 +319,7 @@
             </div>
         </div>
     {:else if $userData && $userStats && $userActivities}
-        <div class="user-card">
+        <div class="user-card card-border">
             <img
                 src={$userData?.profile_medium}
                 alt="User profile image"
@@ -416,6 +371,12 @@
         </div>
 
         <div>
+            {#if filteredActivities.length !== $userActivities.length}
+                <FilteredStats
+                    activities={filteredActivities}
+                    filteredDateRange={filterDateRange}
+                />
+            {/if}
             <h2 class="activity-container-title">Activities</h2>
             <div class="filter-form">
                 <select bind:value={filterType}>
@@ -441,11 +402,15 @@
             <div class="activities-grid">
                 <div class="activities-container">
                     {#each filteredActivities as activity, index (activity.id)}
+                    <div 
+                    class="activity"
+                    class:active={index === activeActivityIndex}
+
+                    >
                         <button
                             class="activity-button"
                             on:click={() => handleActivityClick(index)}
                         >
-                            <div class="activity">
                                 <div class="activity-title">
                                     <a
                                         href={`${stravaActivityURL}/${activity.id}`}
@@ -478,8 +443,8 @@
                                         {activity.total_elevation_gain} m
                                     </span>
                                 </div>
+                            </button>
                             </div>
-                        </button>
                     {/each}
                 </div>
                 {#if filteredActivities.length > 0 && filteredActivities[activeActivityIndex].map.summary_polyline}
@@ -499,6 +464,17 @@
 </main>
 
 <style>
+    div.active {
+        background-color: var(--color-bg-0);
+        color: var(--color-text);
+        border-color: var(--dot-color);
+    }
+
+    /* div.active {
+        background-color: red;
+        color: #000;
+    } */
+
     .clear-filter {
         background-color: transparent;
         border: none;
@@ -522,7 +498,7 @@
     .filter-form {
         display: flex;
         gap: 1rem;
-        margin-bottom: 2rem;
+        margin-bottom: 0.5rem;
         align-items: center;
     }
 
@@ -584,6 +560,8 @@
         border-radius: 10px;
         background-color: inherit;
         color: inherit;
+        margin-bottom: 0.5rem;
+        text-align: left;
     }
     .activity-button {
         background-color: inherit;
@@ -591,8 +569,7 @@
         color: inherit;
         cursor: pointer;
         margin: 0;
-        padding-left: 0;
-        padding-top: 0;
+        padding: 0;
         width: 100%;
     }
     .spinner {
@@ -636,7 +613,7 @@
         height: 50vh;
     }
     button {
-        background-color: #fa6607; /* Green */
+        background-color: #fa6607; /* Orange */
         border: none;
         color: white;
         padding: 15px 32px;
@@ -648,41 +625,10 @@
         cursor: pointer;
         border-radius: 10px;
     }
-
-    .user-card {
-        display: flex;
-        align-items: center;
-        padding: 20px;
-        border: 1px solid var(--dot-color);
-        border-radius: 10px;
-    }
-
     .user-image {
         width: 100px;
         height: 100px;
         border-radius: 50%;
         margin-right: 20px;
     }
-
-    .user-info {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .user-info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-    }
-
-    .user-stats {
-        margin-top: 10px;
-        text-align: left;
-    }
-
-    .user-name {
-        text-align: left;
-        font-weight: bold;
-    }
-    /* Add your styles here */
 </style>

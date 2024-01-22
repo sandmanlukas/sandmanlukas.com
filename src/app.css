@@ -108,8 +108,7 @@ input::placeholder {
 }
 .dark input {
   background-color: inherit;
-  border: 1px solid var(--dot-color)
-
+  border: 1px solid var(--dot-color);
 }
 
 .date-picker {
@@ -146,11 +145,42 @@ button:focus:not(:focus-visible) {
   --dot-color: #ddd;
 }
 
-
 .map-marker-end {
   color: #000;
 }
 
 .map-marker {
   color: #000;
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+}
+
+.card-border {
+  padding: 20px;
+  border: 1px solid var(--dot-color);
+  border-radius: 10px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.user-stats {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.user-name {
+  text-align: left;
+  font-weight: bold;
 }

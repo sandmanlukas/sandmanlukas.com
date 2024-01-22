@@ -142,3 +142,15 @@ export type UserStats = {
     ytd_swim_totals: Totals;
 };
 
+export type TotalStats = {
+    totalDistanceKm: number;
+    totalElevation: number;
+    totalMovingTime: number;
+    totalMovingTimeStr: string;
+    totalElapsedTime: number;
+    totalElapsedTimeStr: string;
+    avgPace: string;
+    avgDistance: number;
+    longestRun: number;
+
+};

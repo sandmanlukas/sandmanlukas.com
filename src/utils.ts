@@ -1,9 +1,11 @@
 import axios from "axios";
-import type { ActivitiesRequest, Activity } from "./types";
+import type { ActivitiesRequest, Activity, TotalStats } from "./types";
+import { fakeActivities, fakeAthlete, fakeUserStats } from "./fakeData";
 
 export const getUserStats = async (userID: string, accessToken: string) => {
     try {
 
+        return { data: fakeUserStats };
         const response = await axios.get(
             `https://www.strava.com/api/v3/athletes/${userID}/stats`,
             { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -19,6 +21,7 @@ export const getUserActivities = async (accessToken: string, before = "", after 
     let page = 1;
     let allActivities: Activity[] = [];
 
+    return fakeActivities;
     do {
         const params: ActivitiesRequest = {
             per_page: perPage,
@@ -58,6 +61,7 @@ export const getUserActivities = async (accessToken: string, before = "", after 
 
 export const getUserData = async (accessToken: string) => {
     try {
+        return { data: fakeAthlete };
         const response = await axios.get(
             `https://www.strava.com/api/v3/athlete`,
             { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -162,6 +166,103 @@ export const getTypeIcon = (type: string): string => {
     return typeToIcon[type as keyof typeof typeToIcon] || '🏅'; // Default to a generic sports medal if the type is not recognized
 };
 
+export const _formatActivities = (activities: Activity[]): { formattedActivities: Activity[], longestRun: number } => {
+    const formattedActivities = [...activities];
+
+    let longestRun = 0;
+    let currentRunStreak = 0;
+    let longestStreak = 0;
+    let previousDate: Date | null = null;
+
+    for (const activity of formattedActivities) {
+        if (
+            activity.sport_type === "Run" &&
+            activity.distance > longestRun
+        ) {
+            longestRun = activity.distance;
+        }
+
+        // Calculate the longest run streak
+        const currentDate = new Date(activity.start_date_local);
+        currentDate.setHours(0, 0, 0, 0);
+
+        if (previousDate) {
+            const diffDays = Math.round(
+                (previousDate.getTime() - currentDate.getTime()) /
+                (1000 * 60 * 60 * 24),
+            );
+            if (diffDays === 1) {
+                currentRunStreak++;
+            } else if (diffDays > 1) {
+                currentRunStreak = 0;
+            }
+        }
+        longestStreak = Math.max(longestStreak, currentRunStreak);
+        previousDate = currentDate;
+
+        const startDate = new Date(activity.start_date);
+        const startDateLocal = new Date(activity.start_date_local);
+        activity.start_date_formatted = formatDate(startDate);
+        activity.start_date_local_formatted = formatDate(startDateLocal);
+        activity.start_time = formatTime(startDate);
+        activity.start_time_local = formatTime(startDateLocal);
+
+        activity.moving_time_str = convertSeconds(activity.moving_time);
+        activity.elapsed_time_str = convertSeconds(activity.elapsed_time);
+
+        // Compute pace in min/km
+        activity.average_pace = computePace(
+            activity.moving_time,
+            activity.distance,
+        );
+    }
+    return { formattedActivities, longestRun };
+}
+
+export const calculateTotalStats = (activities: Activity[]): TotalStats => {
+
+    let totalDistance = 0;
+    let totalElevation = 0;
+    let totalMovingTime = 0;
+    let totalMovingTimeStr = "";
+    let totalElapsedTimeStr = "";
+    let totalElapsedTime = 0;
+    let longestRun = 0;
+    let avgPace = "";
+    let avgDistance = 0;   
+
+
+    activities.forEach(activity => {
+        if (activity.distance > longestRun && activity.sport_type === "Run") {
+            longestRun = activity.distance;
+        }
+
+        totalDistance += activity.distance;
+        totalElevation += activity.total_elevation_gain;
+        totalMovingTime += activity.moving_time;
+        totalElapsedTime += activity.elapsed_time;
+    });
+
+    avgPace = computePace(totalMovingTime, totalDistance);
+    avgDistance = totalDistance / activities.length;
+    totalMovingTimeStr = convertSeconds(totalMovingTime);
+    totalElapsedTimeStr = convertSeconds(totalElapsedTime);
+
+    return {
+        totalDistanceKm: Math.round((totalDistance / 1000) * 10) / 10,
+        totalElevation: Math.round((totalElevation) * 10) / 10,
+        totalElapsedTimeStr,
+        totalMovingTime,
+        totalMovingTimeStr,
+        totalElapsedTime,
+        avgPace,
+        avgDistance: Math.round((avgDistance / 1000)* 10) / 10,
+        longestRun: Math.round((longestRun / 1000) * 10) / 10
+    }
+
+
+};
+
 export function formatDate(date: Date): string {
     const today = new Date();
     const yesterday = new Date(today);
@@ -199,3 +300,5 @@ export function filterActivitiesByDate(activities: Activity[] = [], startDate: D
         return activityDate >= startDate && activityDate <= endDate;
     });
 }
+
+
