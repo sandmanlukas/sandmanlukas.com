@@ -1,22 +1,9 @@
-<script>
+<script lang="ts">
     // Your script code goes here
     import { onMount } from "svelte";
     import { userData, userStats } from "../../../store";
     import { goto } from "$app/navigation";
 
-    let params;
-    /**
-     * @type {string | null}
-     */
-    let state;
-    /**
-     * @type {string | null}
-     */
-    let code;
-    /**
-     * @type {string | null}
-     */
-    let scope;
     export let data;
 
     onMount(async () => {
