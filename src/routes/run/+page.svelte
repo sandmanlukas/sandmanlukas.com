@@ -3,12 +3,9 @@
     import type { Activity, Totals, UserStats } from "../../types";
     import {
         _formatActivities,
-        computePace,
         convertSeconds,
         filterActivitiesByDate,
         filterActivitiesByType,
-        formatDate,
-        formatTime,
         getTypeIcon,
         getUserActivities,
         getUserData,
@@ -241,6 +238,7 @@
                 getUserActivities(accessToken).then((data) => {
                     if (data) {
                         const activities = formatActivities(data);
+                        filteredActivities = activities;
                         userActivities.set(activities);
                     }
                 }),
@@ -281,6 +279,10 @@
             totalRideDistance = $userStats["all_ride_totals"]["distance"];
             totalSwimDistance = $userStats["all_swim_totals"]["distance"];
         }
+
+        if ($userActivities && filteredActivities.length === 0) {
+            filteredActivities = $userActivities;
+        }
     };
 
     onMount(async () => {
@@ -308,15 +310,6 @@
             <button on:click={() => handleLogin(uri)}
                 >Connect with Strava</button
             >
-        </div>
-    {:else if loading}
-        <div class="centered">
-            <p>Fetching your data...</p>
-            <div class="spinner">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-            </div>
         </div>
     {:else if $userData && $userStats && $userActivities}
         <div class="user-card card-border">
@@ -402,15 +395,14 @@
             <div class="activities-grid">
                 <div class="activities-container">
                     {#each filteredActivities as activity, index (activity.id)}
-                    <div 
-                    class="activity"
-                    class:active={index === activeActivityIndex}
-
-                    >
-                        <button
-                            class="activity-button"
-                            on:click={() => handleActivityClick(index)}
+                        <div
+                            class="activity"
+                            class:active={index === activeActivityIndex}
                         >
+                            <button
+                                class="activity-button"
+                                on:click={() => handleActivityClick(index)}
+                            >
                                 <div class="activity-title">
                                     <a
                                         href={`${stravaActivityURL}/${activity.id}`}
@@ -444,7 +436,7 @@
                                     </span>
                                 </div>
                             </button>
-                            </div>
+                        </div>
                     {/each}
                 </div>
                 {#if filteredActivities.length > 0 && filteredActivities[activeActivityIndex].map.summary_polyline}
@@ -460,6 +452,15 @@
                 {/if}
             </div>
         </div>
+    {:else if loading}
+        <div class="centered">
+            <p>Fetching your data...</p>
+            <div class="spinner">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
     {/if}
 </main>
 
@@ -469,11 +470,6 @@
         color: var(--color-text);
         border-color: var(--dot-color);
     }
-
-    /* div.active {
-        background-color: red;
-        color: #000;
-    } */
 
     .clear-filter {
         background-color: transparent;

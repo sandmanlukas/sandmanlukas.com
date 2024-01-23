@@ -1,7 +1,7 @@
 import { testAuthGetter } from "$lib/server/data";
 import { fakeUserData } from "../../../fakeData.js";
 import type { TokenData } from "../../../types/index.js";
-import { getUserStats } from "../../../utils.js";
+import { getUserActivities, getUserStats } from "../../../utils.js";
 
 export const prerender = false;
 export async function load({ url }) {
@@ -17,11 +17,13 @@ export async function load({ url }) {
         const userId = tokens.athlete.id;
 
         const userStats = await getUserStats(String(userId), accessToken);
+        const userActivities = await getUserActivities(String(userId), accessToken);
 
         if (userStats) {
             return {
                 userStats: userStats.data,
                 userData: tokens,
+                userActivities: userActivities,
             }
         }
     }

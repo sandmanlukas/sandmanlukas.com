@@ -1,7 +1,7 @@
 <script lang="ts">
     // Your script code goes here
     import { onMount } from "svelte";
-    import { userData, userStats } from "../../../store";
+    import { userData, userStats, userActivities } from "../../../store";
     import { goto } from "$app/navigation";
 
     export let data;
@@ -18,6 +18,10 @@
 
             if (data.userStats) {
                 userStats.set(data.userStats);
+            }
+
+            if (data.userActivities) {
+                userActivities.set(data.userActivities);
             }
 
             goto("/run", { replaceState: true });
