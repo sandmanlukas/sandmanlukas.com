@@ -1,10 +1,12 @@
 <script lang="ts">
     import { browser } from "$app/environment";
+    import { themeStore } from "../../store";
 
     let darkMode: boolean = true;
 
     function handleSwitchDarkMode() {
             darkMode = !darkMode;
+            themeStore.set(darkMode ? "dark" : "light");
 
             localStorage.setItem("theme", darkMode ? "dark" : "light");
             darkMode
@@ -12,7 +14,7 @@
                 : document.documentElement.classList.remove("dark");
     }
 
-    if (browser) {        
+    if (browser) { 
         if (
             localStorage.theme === "dark" ||
             (!("theme" in localStorage) &&
@@ -20,10 +22,12 @@
         ) {
             document.documentElement.classList.add("dark");
             darkMode = true;
+            themeStore.set("dark");
         } 
         else {
             document.documentElement.classList.remove("dark");
             darkMode = false;
+            themeStore.set("light");
         }
     }
 </script>

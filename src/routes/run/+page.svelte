@@ -21,6 +21,7 @@
     import "flatpickr/dist/flatpickr.css";
     import Leaflet from "$lib/Leaflet.svelte";
     import FilteredStats from "$lib/FilteredStats.svelte";
+    import Charts from "$lib/Charts.svelte";
 
     const mountEverestHeight = 8848;
 
@@ -369,6 +370,7 @@
                     activities={filteredActivities}
                     filteredDateRange={filterDateRange}
                 />
+                <Charts data={filteredActivities}/>
             {/if}
             <h2 class="activity-container-title">Activities</h2>
             <div class="filter-form">
