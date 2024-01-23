@@ -10,10 +10,12 @@
   --font-mono: 'Fira Mono', monospace;
   --color-bg-0: rgb(202, 216, 228);
   --color-bg-1: hsl(209, 36%, 86%);
+  --color-bg-1-invert: rgb(82 82 91);
   --color-bg-2: hsl(224, 44%, 95%);
   --color-theme-1: #ff3e00;
   --color-theme-2: #4075a6;
   --color-text: rgba(0, 0, 0, 0.7);
+  --color-text-invert: #ddd;
   --column-width: 42rem;
   --column-margin-top: 4rem;
   --dot-color: #000;
@@ -23,7 +25,7 @@
 
 body {
   transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-  @apply bg-white dark:bg-zinc-600 text-black dark:text-text-dark text-center;
+  /* @apply bg-white dark:bg-zinc-600 text-black dark:text-text-dark text-center; */
 }
 
 .corner img {
@@ -106,6 +108,16 @@ input {
 input::placeholder {
   color: var(--dot-color);
 }
+
+.dark {
+  --dot-color: #ddd;
+  --color-bg-1: rgb(82 82 91);
+  --color-bg-1-invert: hsl(209, 36%, 86%);
+  --color-text: #ddd;
+  --color-text-invert: #000;
+  --color-theme-1: #f6511a;
+}
+
 .dark input {
   background-color: inherit;
   border: 1px solid var(--dot-color);
@@ -139,10 +151,6 @@ button:focus:not(:focus-visible) {
 
 .card {
   @apply border-black dark:border-white;
-}
-
-.dark {
-  --dot-color: #ddd;
 }
 
 .map-marker-end {

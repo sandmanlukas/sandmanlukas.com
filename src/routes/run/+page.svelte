@@ -466,9 +466,8 @@
 
 <style>
     div.active {
-        background-color: var(--color-bg-0);
-        color: var(--color-text);
-        border-color: var(--dot-color);
+        background-color: var(--color-bg-1-invert);
+        color: var(--color-text-invert);
     }
 
     .clear-filter {
@@ -536,7 +535,7 @@
         text-align: left;
         padding-top: 0;
         margin-top: 0;
-        opacity: 0.65;
+        opacity: 0.8;
         font-size: small;
     }
     .activity-title {
