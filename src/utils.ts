@@ -89,6 +89,14 @@ export async function refreshToken(refresh_token: string) {
 }
 
 
+export const convertPacetoString = (pace: number): string => {
+    var leftover = pace % 1;
+    var minutes = pace - leftover;
+    var seconds: string | number = Math.round(leftover * 60);
+    seconds = seconds < 10 ? `0${seconds}` : seconds;
+    return `${minutes}:${seconds}`;
+}
+
 export const convertSeconds = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)

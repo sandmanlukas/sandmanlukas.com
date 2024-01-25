@@ -4,16 +4,34 @@
     import type { Activity } from "../types";
     import Tabs from "./Tabs.svelte";
     import { themeStore } from "../store";
+    import { convertPacetoString } from "../utils";
 
     // export const data: Activity[] = [];
     export let data: Activity[];
-    let chartData: any = {
+
+    let chartDataDistance: any = {
         labels: [],
         datasets: [],
     };
 
+    let chartDataPace: any = {
+        labels: [],
+        datasets: [],
+    };
+
+    let paceOptions: any = {};
+    let distanceOptions: any = {};
+
     let labels: string[] = [];
-    let dataPoints: number[] = [];
+    let dataPointsDistance: number[] = [];
+    let dataPointsPace: number[] = [];
+
+    let averageDistance: number = 0;
+    let averageDistancePoints: number[] = [];
+
+    let averagePace: number = 0;
+    let averagePacePoints: number[] = [];
+
     let items: {
         label: string;
         value: number;
@@ -24,84 +42,235 @@
 
     let color: string;
     let theme: string;
-    let options = {
-        responsive: true,
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: "",
-                    color: "",
+
+    function setOptions(
+        xTitle: string,
+        yTitle: string,
+        color: string,
+        labels: string[],
+    ) {
+        let options: any = {
+            responsive: true,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: xTitle,
+                        color: color,
+                    },
+                    ticks: {
+                        color: color,
+                        callback: function (index: number) {
+                            if (index % 3 === 0) {
+                                return labels[index];
+                            }
+                        },
+                    },
                 },
-                ticks: {
-                    color: "",
+                y: {
+                    title: {
+                        display: true,
+                        text: yTitle,
+                        color: color,
+                    },
+                    ticks: {
+                        color: color,
+                    },
                 },
             },
-            y: {
-                title: {
-                    display: true,
-                    text: "",
-                    color: "",
+            plugins: {
+                legend: {
+                    labels: {
+                        color: color,
+                    },
                 },
-                ticks: {
-                    color: "",
-                },
-            },
-        },
-        plugins: {
-            legend: {
-                labels: {
-                    color: "",
+                tooltip: {
+                    titleColor: "#ddd",
+                    bodyColor: "#ddd",
+                    footerColor: "#ddd",
                 },
             },
-            tooltip: {
-                titleColor: "",
-                bodyColor: "",
-                footerColor: "",
+        };
+
+        if (yTitle === "Pace (min/km)") {
+            options = {
+                ...options,
+                scales: {
+                    ...options.scales,
+                    y: {
+                        ...options.scales.y,
+                        reverse: true,
+                        ticks: {
+                            callback: function (value: string, index: number) {
+                                return convertPacetoString(parseFloat(value));
+                            },
+                        },
+                    },
+                },
+                plugins: {
+                    ...options.plugins,
+                    tooltip: {
+                        ...options.plugins.tooltip,
+                        callbacks: {
+                            label: function (context: any) {
+                                let label = context.dataset.label || "";
+
+                                if (label) {
+                                    label += ": ";
+                                }
+
+                                if (context.parsed.y !== null) {
+                                    label += convertPacetoString(
+                                        context.parsed.y,
+                                    );
+                                }
+
+                                return label;
+                            },
+                        },
+                    },
+                },
+            };
+
+            // options.scales.y.ticks = {
+            //     callback: function (value: string, index: number) {
+            //         return convertPacetoString(parseFloat(value));
+            //     },
+            // };
+
+            // options.plugins.tooltip.callbacks = {
+            //     label: function (context: any) {
+            //         let label = context.dataset.label || "";
+
+            //         if (label) {
+            //             label += ": ";
+            //         }
+
+            //         if (context.parsed.y !== null) {
+            //             label += convertPacetoString(context.parsed.y);
+            //         }
+
+            //         return label;
+            //     },
+            // };
+        }
+
+        return options;
+    }
+
+    function updateOptions(options: any, color: string) {
+        options.scales.x.title.color = color;
+        options.scales.x.ticks.color = color;
+
+        options.scales.y.title.color = color;
+        options.scales.y.ticks.color = color;
+
+        options.plugins.legend.labels.color = color;
+        return options;
+    }
+
+    function setChartData(
+        chartData: any,
+        data: number[],
+        averageData: number[],
+        labels: string[],
+        theme: string,
+        firstLabel: string,
+        secondLabel: string,
+    ) {
+        chartData.labels = labels;
+
+        chartData.datasets = [
+            {
+                label: firstLabel,
+                fill: true,
+                lineTension: 0.25,
+                borderColor: "#fa6607",
+                borderCapStyle: "butt",
+                borderJoinStyle: "miter",
+                pointBorderColor: theme === "dark" ? "#ddd" : "#000",
+                pointBackgroundColor: "#000",
+                pointBorderWidth: 2,
+                pointHoverBackgroundColor: "#fa6607",
+                pointHoverBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointHitRadius: 10,
             },
-        },
-    };
+            {
+                label: secondLabel,
+                fill: false,
+                borderColor: "rgba(0,0,0,0.3)",
+                borderJoinStyle: "miter",
+            },
+        ];
+
+        // Line of points
+        if (data.length > 0) {
+            chartData.datasets[0].data = data;
+        }
+
+        // Line of average
+        if (averageData.length > 0) {
+            chartData.datasets[1].data = averageData;
+        }
+        return chartData;
+    }
+
+    function updateColors(chartData: any, theme: string) {
+        chartData.datasets[0].pointBorderColor =
+            theme === "dark" ? "#ddd" : "#000";
+        chartData.datasets[0].pointBackgroundColor =
+            theme === "dark" ? "#000" : "#ddd";
+        chartData.datasets[0].pointHoverBackgroundColor =
+            theme === "dark" ? "#000" : "#ddd";
+        chartData.datasets[0].pointHoverBorderColor =
+            theme === "dark" ? "#ddd" : "#000";
+        return chartData;
+    }
 
     $: {
-        if (chartData.labels.length > 0 && chartData.datasets.length > 0) {            
-            theme = $themeStore;
+        theme = $themeStore;
 
-            if (theme === "dark") {
-                color = "#ddd";
-            } else {
-                color = "#000000b3";
-            }
+        if (theme === "dark") {
+            color = "#ddd";
+        } else {
+            color = "#000000b3";
+        }
 
-            options.scales.x.title.text = "Date";
-            options.scales.x.title.color = color;
-            options.scales.x.ticks.color = color;
+        if (
+            chartDataDistance.labels.length > 0 &&
+            chartDataDistance.datasets.length > 0
+        ) {
+            chartDataDistance = updateColors(chartDataDistance, theme);
 
-            options.scales.y.title.text = "Distance (km)";
-            options.scales.y.title.color = color;
-            options.scales.y.ticks.color = color;
-
-            options.plugins.legend.labels.color = color;
-            options.plugins.tooltip.titleColor = color;
-            options.plugins.tooltip.bodyColor = color;
-            options.plugins.tooltip.footerColor = color;
+            distanceOptions = updateOptions(distanceOptions, color);
 
             items = [
                 {
                     label: "Distance (km) per run",
                     value: 1,
                     component: LineChart as typeof SvelteComponent,
-                    data: chartData,
-                    options,
+                    data: chartDataDistance,
+                    options: distanceOptions,
                 },
-                {
-                    label: "Tab 2",
-                    value: 2,
-                    component: LineChart as typeof SvelteComponent,
-                    data: chartData,
-                    options,
-                },
-                // { label: "Tab 2", value: 2, component: LineChart as typeof SvelteComponent, data: data2 },
             ];
+        }
+
+        if (
+            chartDataPace.labels.length > 0 &&
+            chartDataPace.datasets.length > 0
+        ) {
+            chartDataPace = updateColors(chartDataPace, theme);
+            paceOptions = updateOptions(paceOptions, color);
+
+            items.push({
+                label: "Pace (min/km) per run",
+                value: 2,
+                component: LineChart as typeof SvelteComponent,
+                data: chartDataPace,
+                options: paceOptions,
+            });
         }
     }
 
@@ -111,7 +280,7 @@
         }
 
         theme = $themeStore;
-        
+
         if (theme === "dark") {
             color = "#ddd";
         } else {
@@ -123,69 +292,76 @@
                 labels.push(activity.start_date_local_formatted);
             }
 
-            if (activity.distance) {
+            if (activity.distance && activity.moving_time) {
                 let distanceKm =
                     Math.round((activity.distance / 1000) * 10) / 10;
-                dataPoints.push(distanceKm);
+                dataPointsDistance.push(distanceKm);
+
+                let pace =
+                    (activity.moving_time / activity.distance / 60) * 1000;
+
+                dataPointsPace.push(pace);
             }
         });
-        chartData.labels = labels;
 
-        chartData.datasets.push({
-            label: "Distance (km)",
-            fill: true,
-            lineTension: 0.25,
-            borderColor: "#fa6607",
-            borderCapStyle: "butt",
-            borderDash: [],
-            borderDashOffset: 0.0,
-            borderJoinStyle: "miter",
-            pointBorderColor: "rgb(205, 130,1 58)",
-            pointBackgroundColor: "#fa6607",
-            pointBorderWidth: 8,
-            pointHoverRadius: 5,
-            pointHoverBackgroundColor: "#fa6607",
-            pointHoverBorderColor: "rgba(220, 220, 220,1)",
-            pointHoverBorderWidth: 2,
-            pointRadius: 1,
-            pointHitRadius: 10,
-            data: dataPoints,
-        });
+        averageDistance =
+            dataPointsDistance.reduce((sum, value) => sum + value, 0) /
+            dataPointsDistance.length;
+        averageDistancePoints = Array(dataPointsDistance.length).fill(
+            averageDistance,
+        );
 
-        options.scales.x.title.text = "Date";
-        options.scales.x.title.color = color;
-        options.scales.x.ticks.color = color;
+        averagePace =
+            dataPointsPace.reduce((sum, value) => sum + value, 0) /
+            dataPointsPace.length;
+        averagePacePoints = Array(dataPointsPace.length).fill(averagePace);
 
-        options.scales.y.title.text = "Distance (km)";
-        options.scales.y.title.color = color;
-        options.scales.y.ticks.color = color;
+        chartDataDistance = setChartData(
+            chartDataDistance,
+            dataPointsDistance,
+            averageDistancePoints,
+            labels,
+            theme,
+            "Distance (km)",
+            "Average distance (km)",
+        );
 
-        options.plugins.legend.labels.color = color;
-        options.plugins.tooltip.titleColor = color;
-        options.plugins.tooltip.bodyColor = color;
-        options.plugins.tooltip.footerColor = color;
+        chartDataPace = setChartData(
+            chartDataPace,
+            dataPointsPace,
+            averagePacePoints,
+            labels,
+            theme,
+            "Pace (min/km)",
+            "Average pace (min/km)",
+        );
+
+        distanceOptions = setOptions("Date", "Distance (km)", color, labels);
+
+        paceOptions = setOptions("Date", "Pace (min/km)", color, labels);
 
         items = [
             {
                 label: "Distance (km) per run",
                 value: 1,
                 component: LineChart as typeof SvelteComponent,
-                data: chartData,
-                options,
+                data: chartDataDistance,
+                options: distanceOptions,
             },
             {
-                label: "Tab 2",
+                label: "Pace (min/km) per run",
                 value: 2,
                 component: LineChart as typeof SvelteComponent,
-                data: chartData,
-                options,
+                data: chartDataPace,
+                options: paceOptions,
             },
-            // { label: "Tab 2", value: 2, component: LineChart as typeof SvelteComponent, data: data2 },
         ];
     });
 
     onDestroy(() => {
         data = [];
+        chartDataDistance = [];
+        chartDataPace = [];
     });
 </script>
 

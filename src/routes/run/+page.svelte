@@ -3,6 +3,7 @@
     import type { Activity, Totals, UserStats } from "../../types";
     import {
         _formatActivities,
+        convertPacetoString,
         convertSeconds,
         filterActivitiesByDate,
         filterActivitiesByType,
@@ -199,11 +200,7 @@
                     var pace =
                         (statObject.moving_time / statObject.distance / 60) *
                         1000;
-                    var leftover = pace % 1;
-                    var minutes = pace - leftover;
-                    var seconds: string | number = Math.round(leftover * 60);
-                    seconds = seconds < 10 ? `0${seconds}` : seconds;
-                    var paceStr = `${minutes}:${seconds}`;
+                    var paceStr = convertPacetoString(pace);
 
                     statObject.total_average_speed = paceStr;
                     statObject.distance_km = totalDistanceInKm;
@@ -370,8 +367,8 @@
                     activities={filteredActivities}
                     filteredDateRange={filterDateRange}
                 />
-                <Charts data={filteredActivities}/>
             {/if}
+            <Charts data={filteredActivities} />
             <h2 class="activity-container-title">Activities</h2>
             <div class="filter-form">
                 <select bind:value={filterType}>
@@ -442,13 +439,16 @@
                     {/each}
                 </div>
                 {#if filteredActivities.length > 0 && filteredActivities[activeActivityIndex].map.summary_polyline}
-                    <Leaflet
-                        view={filteredActivities[activeActivityIndex]
-                            .start_latlng}
-                        encodedPolyline={filteredActivities[activeActivityIndex]
-                            .map.summary_polyline}
-                        zoom={13}
-                    ></Leaflet>
+                    <div class="map-container">
+                        <Leaflet
+                            view={filteredActivities[activeActivityIndex]
+                                .start_latlng}
+                            encodedPolyline={filteredActivities[
+                                activeActivityIndex
+                            ].map.summary_polyline}
+                            zoom={13}
+                        ></Leaflet>
+                    </div>
                 {:else}
                     <p>No map data for this activity :(</p>
                 {/if}
@@ -467,6 +467,11 @@
 </main>
 
 <style>
+    .map-container {
+        border: 1px solid var(--color-bg-1-invert);
+        padding: 0.5rem;
+        border-radius: 10px;
+    }
     div.active {
         background-color: var(--color-bg-1-invert);
         color: var(--color-text-invert);
