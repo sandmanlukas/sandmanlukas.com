@@ -4,8 +4,6 @@ import { fakeActivities, fakeAthlete, fakeUserStats } from "./fakeData";
 
 export const getUserStats = async (userID: string, accessToken: string) => {
     try {
-
-        return { data: fakeUserStats };
         const response = await axios.get(
             `https://www.strava.com/api/v3/athletes/${userID}/stats`,
             { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -21,7 +19,6 @@ export const getUserActivities = async (accessToken: string, before = "", after 
     let page = 1;
     let allActivities: Activity[] = [];
 
-    return fakeActivities;
     do {
         const params: ActivitiesRequest = {
             per_page: perPage,
@@ -61,7 +58,6 @@ export const getUserActivities = async (accessToken: string, before = "", after 
 
 export const getUserData = async (accessToken: string) => {
     try {
-        return { data: fakeAthlete };
         const response = await axios.get(
             `https://www.strava.com/api/v3/athlete`,
             { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -237,7 +233,7 @@ export const calculateTotalStats = (activities: Activity[]): TotalStats => {
     let totalElapsedTime = 0;
     let longestRun = 0;
     let avgPace = "";
-    let avgDistance = 0;   
+    let avgDistance = 0;
 
 
     activities.forEach(activity => {
@@ -264,7 +260,7 @@ export const calculateTotalStats = (activities: Activity[]): TotalStats => {
         totalMovingTimeStr,
         totalElapsedTime,
         avgPace,
-        avgDistance: Math.round((avgDistance / 1000)* 10) / 10,
+        avgDistance: Math.round((avgDistance / 1000) * 10) / 10,
         longestRun: Math.round((longestRun / 1000) * 10) / 10
     }
 

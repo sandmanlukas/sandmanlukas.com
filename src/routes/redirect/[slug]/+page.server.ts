@@ -10,9 +10,9 @@ export async function load({ url }) {
     let state = url.searchParams.get("state");
 
     if (code) {
-        // const tokens: TokenData = await testAuthGetter(code);
-        const tokens = fakeUserData;
-        
+        const tokens: TokenData = await testAuthGetter(code);
+        // const tokens = fakeUserData;
+
         const accessToken = tokens.access_token;
         const userId = tokens.athlete.id;
 
