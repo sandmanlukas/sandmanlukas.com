@@ -1,5 +1,5 @@
 import { testAuthGetter } from "$lib/server/data";
-import { fakeUserData } from "../../../fakeData.js";
+// import { fakeUserData } from "../../../fakeData.js";
 import type { TokenData } from "../../../types/index.js";
 import { getUserActivities, getUserStats } from "../../../utils.js";
 
