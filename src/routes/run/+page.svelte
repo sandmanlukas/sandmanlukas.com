@@ -368,7 +368,10 @@
                     filteredDateRange={filterDateRange}
                 />
             {/if}
-            <Charts data={filteredActivities} />
+
+            {#if filteredActivities.length > 0}
+                <Charts data={filteredActivities} />
+            {/if}
             <h2 class="activity-container-title">Activities</h2>
             <div class="filter-form">
                 <select bind:value={filterType}>

@@ -131,28 +131,6 @@
                     },
                 },
             };
-
-            // options.scales.y.ticks = {
-            //     callback: function (value: string, index: number) {
-            //         return convertPacetoString(parseFloat(value));
-            //     },
-            // };
-
-            // options.plugins.tooltip.callbacks = {
-            //     label: function (context: any) {
-            //         let label = context.dataset.label || "";
-
-            //         if (label) {
-            //             label += ": ";
-            //         }
-
-            //         if (context.parsed.y !== null) {
-            //             label += convertPacetoString(context.parsed.y);
-            //         }
-
-            //         return label;
-            //     },
-            // };
         }
 
         return options;
@@ -287,75 +265,82 @@
             color = "#000";
         }
 
-        data.forEach((activity) => {
-            if (activity.start_date_local_formatted) {
-                labels.push(activity.start_date_local_formatted);
-            }
+        if (data.length > 0) {
+            data.forEach((activity) => {
+                if (activity.start_date_local_formatted) {
+                    labels.push(activity.start_date_local_formatted);
+                }
 
-            if (activity.distance && activity.moving_time) {
-                let distanceKm =
-                    Math.round((activity.distance / 1000) * 10) / 10;
-                dataPointsDistance.push(distanceKm);
+                if (activity.distance && activity.moving_time) {
+                    let distanceKm =
+                        Math.round((activity.distance / 1000) * 10) / 10;
+                    dataPointsDistance.push(distanceKm);
 
-                let pace =
-                    (activity.moving_time / activity.distance / 60) * 1000;
+                    let pace =
+                        (activity.moving_time / activity.distance / 60) * 1000;
 
-                dataPointsPace.push(pace);
-            }
-        });
+                    dataPointsPace.push(pace);
+                }
+            });
 
-        averageDistance =
-            dataPointsDistance.reduce((sum, value) => sum + value, 0) /
-            dataPointsDistance.length;
-        averageDistancePoints = Array(dataPointsDistance.length).fill(
-            averageDistance,
-        );
+            averageDistance =
+                dataPointsDistance.reduce((sum, value) => sum + value, 0) /
+                dataPointsDistance.length;
+            averageDistancePoints = Array(dataPointsDistance.length).fill(
+                averageDistance,
+            );
 
-        averagePace =
-            dataPointsPace.reduce((sum, value) => sum + value, 0) /
-            dataPointsPace.length;
-        averagePacePoints = Array(dataPointsPace.length).fill(averagePace);
+            averagePace =
+                dataPointsPace.reduce((sum, value) => sum + value, 0) /
+                dataPointsPace.length;
+            averagePacePoints = Array(dataPointsPace.length).fill(averagePace);
 
-        chartDataDistance = setChartData(
-            chartDataDistance,
-            dataPointsDistance,
-            averageDistancePoints,
-            labels,
-            theme,
-            "Distance (km)",
-            "Average distance (km)",
-        );
+            chartDataDistance = setChartData(
+                chartDataDistance,
+                dataPointsDistance,
+                averageDistancePoints,
+                labels,
+                theme,
+                "Distance (km)",
+                "Average distance (km)",
+            );
 
-        chartDataPace = setChartData(
-            chartDataPace,
-            dataPointsPace,
-            averagePacePoints,
-            labels,
-            theme,
-            "Pace (min/km)",
-            "Average pace (min/km)",
-        );
+            chartDataPace = setChartData(
+                chartDataPace,
+                dataPointsPace,
+                averagePacePoints,
+                labels,
+                theme,
+                "Pace (min/km)",
+                "Average pace (min/km)",
+            );
 
-        distanceOptions = setOptions("Date", "Distance (km)", color, labels);
+            distanceOptions = setOptions(
+                "Date",
+                "Distance (km)",
+                color,
+                labels,
+            );
 
-        paceOptions = setOptions("Date", "Pace (min/km)", color, labels);
+            paceOptions = setOptions("Date", "Pace (min/km)", color, labels);
 
-        items = [
-            {
-                label: "Distance (km) per run",
-                value: 1,
-                component: LineChart as typeof SvelteComponent,
-                data: chartDataDistance,
-                options: distanceOptions,
-            },
-            {
-                label: "Pace (min/km) per run",
-                value: 2,
-                component: LineChart as typeof SvelteComponent,
-                data: chartDataPace,
-                options: paceOptions,
-            },
-        ];
+            items = [
+                {
+                    label: "Distance (km) per run",
+                    value: 1,
+                    component: LineChart as typeof SvelteComponent,
+                    data: chartDataDistance,
+                    options: distanceOptions,
+                },
+                {
+                    label: "Pace (min/km) per run",
+                    value: 2,
+                    component: LineChart as typeof SvelteComponent,
+                    data: chartDataPace,
+                    options: paceOptions,
+                },
+            ];
+        }
     });
 
     onDestroy(() => {
