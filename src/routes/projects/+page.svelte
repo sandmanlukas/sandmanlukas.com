@@ -3,7 +3,7 @@
 		{
 			title: "nettest",
 			description:
-			'cli app to determine internet speed, based on <a href="https://fast.com/">fast.com</a>',
+				'cli app to determine internet speed, based on <a href="https://fast.com/">fast.com</a>',
 			imageUrl: "/images/nettest.png",
 			tech: ["Rust"],
 			url: "https://github.com/sandmanlukas/nettest",
@@ -11,7 +11,7 @@
 		{
 			title: "tram checker",
 			description:
-			"cli app to check next buses and trams from stations around gothenburg.",
+				"cli app to check next buses and trams from stations around gothenburg.",
 			imageUrl: "/images/tram_checker.png",
 			tech: ["Rust"],
 			url: "https://github.com/sandmanlukas/tram_checker",
@@ -28,16 +28,16 @@
 			title: "streck counter",
 			description:
 				"website for committee at chalmers. handles internal stuff. 🕵️‍♂️",
-			imageUrl: '/images/streck_counter.png',
-			tech: ["React.js", "Java/Typescript", "CSS", "HTML", "MongoDB"],
+			imageUrl: "/images/streck_counter.png",
+			tech: ["React.js", "Typescript", "CSS", "HTML", "MongoDB"],
 			url: "https://streck.up.railway.app/login",
 		},
 		{
 			title: "personal website",
 			description: "portfolio website for myself.",
 			imageUrl: "/images/svelte-logo.svg",
-			tech: ["SvelteKit", "Java/Typescript", "CSS", "HTML"],
-			url: "https://sandmanlukas.github.io/",
+			tech: ["SvelteKit", "Typescript", "CSS", "HTML"],
+			url: "https://sandmanlukas.com/",
 		},
 	];
 </script>
@@ -47,25 +47,24 @@
 	<meta name="description" content="Some of my projects" />
 </svelte:head>
 
-<div class="card-container" >
+<div class="card-container">
 	{#each cards as card (card.title)}
-		<div class="card" >
+		<div class="card">
 			{#if card.imageUrl}
 				<img src={card.imageUrl} alt={card.title} />
 			{/if}
-				<a href={card.url}><h2>{card.title}</h2></a>
-				<p>{@html card.description}</p>
-				<div class="technology-pill-container">
-					{#each card.tech as tech}
+			<a href={card.url}><h2>{card.title}</h2></a>
+			<p>{@html card.description}</p>
+			<div class="technology-pill-container">
+				{#each card.tech as tech}
 					<div class="technology-pill">{tech}</div>
-					{/each}
+				{/each}
 			</div>
 		</div>
 	{/each}
 </div>
 
 <style>
-
 	:root {
 		--background-color-light: #fff;
 		--text-color-light: #fff;
@@ -84,7 +83,7 @@
 
 	.card:last-child:nth-last-child(odd) {
 		grid-column: auto / span 2;
-}
+	}
 	/* Styles for each card */
 	.card {
 		display: flex;
@@ -112,8 +111,7 @@
 		height: auto;
 		max-height: 10rem;
 		border-radius: 10px;
-		justify-content:start;
-
+		justify-content: start;
 	}
 
 	/* Style for the card title */
@@ -142,5 +140,23 @@
 		margin: 5px 5px 0 0; /* Add spacing between pills */
 		border-radius: 20px;
 		font-size: 12px;
+		justify-content: center;
+	}
+
+	@media (max-width: 580px) {
+		.card-container {
+			display: block;
+		}
+
+		.technology-pill-container {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.technology-pill-container > :last-child:nth-child(odd) {
+			grid-template-columns: 1fr;
+			grid-column: span 2;
+			justify-content: center;
+		}
 	}
 </style>

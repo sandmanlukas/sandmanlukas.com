@@ -4,15 +4,15 @@
     let darkMode: boolean = true;
 
     function handleSwitchDarkMode() {
-            darkMode = !darkMode;
+        darkMode = !darkMode;
 
-            localStorage.setItem("theme", darkMode ? "dark" : "light");
-            darkMode
-                ? document.documentElement.classList.add("dark")
-                : document.documentElement.classList.remove("dark");
+        localStorage.setItem("theme", darkMode ? "dark" : "light");
+        darkMode
+            ? document.documentElement.classList.add("dark")
+            : document.documentElement.classList.remove("dark");
     }
 
-    if (browser) {        
+    if (browser) {
         if (
             localStorage.theme === "dark" ||
             (!("theme" in localStorage) &&
@@ -20,8 +20,7 @@
         ) {
             document.documentElement.classList.add("dark");
             darkMode = true;
-        } 
-        else {
+        } else {
             document.documentElement.classList.remove("dark");
             darkMode = false;
         }
@@ -44,7 +43,7 @@
     }
 
     #theme-toggle + label {
-        @apply inline-block cursor-pointer h-8 w-8 absolute top-2 right-16 rounded-full duration-300 content-[''];
+        @apply inline-block cursor-pointer h-7 w-7 absolute top-2 rounded-full duration-300 content-[''];
     }
 
     #theme-toggle:not(:checked) + label {

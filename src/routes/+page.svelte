@@ -4,7 +4,7 @@
 	const date = DateTime.local(2023, 8, 29, 12, 0, 0);
 	const streak = Math.round(Math.abs(date.diffNow("days").days));
 
-	const spotifyTrack = 'track/0LbZxI8FZU1E48EqF9XgC0?si=cc2a9508809d4939'
+	const spotifyTrack = "track/0LbZxI8FZU1E48EqF9XgC0?si=cc2a9508809d4939";
 </script>
 
 <svelte:head>
@@ -21,7 +21,7 @@
 
 	<div class="main-container">
 		<p>
-			I'm software developer interested in ML, cyber security and web
+			I'm a software developer interested in ML, cyber security and web
 			development. When I'm not coding I'm either running or trying to
 			learn how to DJ.
 		</p>
@@ -33,20 +33,13 @@
 		<p class="song-p">Current song on repeat 💿:</p>
 
 		<div id="embed-iframe" class="song-container">
-			<!-- 
-			<Spotify
-				height="200px"
-				width="100%"
-				spotifyLink="track/7MHjC4y8tMWDV1xA3CpqzX?si=75c6fc05bcaa4697"
-			/> -->
 			<iframe
-			title="spotify-embed"
+				title="spotify-embed"
 				style="border-radius:12px"
 				src="https://open.spotify.com/embed/{spotifyTrack}?utm_source=generator&theme=1"
 				width="100%"
 				height="152"
 				frameBorder="0"
-
 				allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
 				loading="lazy"
 			/>
@@ -94,5 +87,20 @@
 		padding: 0;
 
 		z-index: 50;
+	}
+
+	@media (max-width: 580px) {
+		h1 {
+			margin-top: 0;
+		}
+
+		.song-p {
+			font-weight: normal;
+			font-size: small;
+		}
+
+		.running-p {
+			font-size: small;
+		}
 	}
 </style>

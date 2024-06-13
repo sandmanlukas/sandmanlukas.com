@@ -1,12 +1,11 @@
-<script lang=ts>
+<script lang="ts">
 	import { page } from "$app/stores";
 
 	import github from "$lib/images/github.svg";
 	import linkedin from "$lib/images/linkedin.svg";
 	import email from "$lib/images/email.svg";
 	import cv from "$lib/cv.pdf";
-
-
+	import ThemeSwitch from "$lib/ThemeSwitch/ThemeSwitch.svelte";
 </script>
 
 <header>
@@ -26,12 +25,12 @@
 				<a href="/whoami">whoami</a>
 			</li>
 			<li
-			aria-current={$page.url.pathname === "/projects"
-				? "page"
-				: undefined}
-		>
-			<a href="/projects">projects</a>
-		</li>
+				aria-current={$page.url.pathname === "/projects"
+					? "page"
+					: undefined}
+			>
+				<a href="/projects">projects</a>
+			</li>
 			<li>
 				<a href={cv} download="Lukas_Sandman_CV">resume.pdf</a>
 			</li>
@@ -39,7 +38,7 @@
 		<svg viewBox="0 0 2 3" aria-hidden="true">
 			<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" />
 		</svg>
-		
+		<ThemeSwitch />
 	</nav>
 
 	<div class="corner">
@@ -58,7 +57,6 @@
 <style>
 	header {
 		display: flex;
-		/* justify-content: space; */
 	}
 
 	.corner {
@@ -76,8 +74,8 @@
 	}
 
 	.corner img {
-		width: 2em;
-		height: 2em;
+		width: 2rem;
+		height: 2rem;
 		object-fit: contain;
 	}
 
@@ -145,5 +143,41 @@
 
 	a:hover {
 		color: var(--color-theme-1);
+	}
+
+	/* Responsive styles */
+	@media (max-width: 580px) {
+		svg {
+			display: none;
+		}
+
+		ul {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			justify-items: center;
+			align-items: center;
+			height: auto;
+			border-radius: 0.5rem;
+		}
+
+		ul a {
+			margin-bottom: 0.5rem;
+		}
+
+		nav a {
+			padding: 0 0.25rem;
+		}
+
+		header {
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.corner {
+			display: flex;
+			width: auto;
+			gap: 1rem;
+
+		}
 	}
 </style>

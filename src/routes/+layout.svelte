@@ -10,7 +10,6 @@
 
 <div data-sveltekit-preload-data="hover" class="app">
 	<Header />
-	<ThemeSwitch />
 	<PageTransition key={data.url} duration={350}>
 		<main>
 			<slot />
@@ -34,5 +33,12 @@
 		max-width: 70rem;
 		margin: 0 auto;
 		box-sizing: border-box;
+	}
+
+	@media (max-width: 580px) {
+		main {
+			padding-left: 0;
+			padding-right: 0;
+		}
 	}
 </style>
