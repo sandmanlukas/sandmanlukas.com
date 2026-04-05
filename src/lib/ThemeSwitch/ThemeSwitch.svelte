@@ -34,7 +34,7 @@
         type="checkbox"
         id="theme-toggle"
     />
-    <label for="theme-toggle" />
+    <label for="theme-toggle"></label>
 </div>
 
 <style lang="postcss">
