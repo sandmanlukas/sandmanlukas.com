@@ -17,10 +17,7 @@
     import { PUBLIC_CLIENT_ID } from "$env/static/public";
     import { onMount } from "svelte";
 
-    import Flatpickr from "svelte-flatpickr";
-
     import "@fortawesome/fontawesome-free/css/all.min.css";
-    import "flatpickr/dist/flatpickr.css";
     import Leaflet from "$lib/Leaflet.svelte";
 
     const mountEverestHeight = 8848;
@@ -43,24 +40,14 @@
 
     let filterType = "";
 
-    let filterDateRange: Date[] = [];
+    let filterDateFrom: string = "";
+    let filterDateTo: string = "";
 
     let filteredActivities: Activity[] = [];
     let activityTypes: string[] = [];
 
-    let firstDate: string;
-    let lastDate: string;
-
-    let options = {
-        enableTime: false,
-        mode: "range" as const,
-        dateFormat: "Y-m-d",
-        onChange: (selectedDates: Date[]) => {
-            filterDateRange = selectedDates;
-        },
-        minDate: "",
-        maxDate: "",
-    };
+    let firstDate: string = "";
+    let lastDate: string = "";
 
     $: if ($userActivities.length > 0) {
         activityTypes = [...new Set($userActivities.map((a) => a.sport_type))];
@@ -75,18 +62,12 @@
         }
 
         // If there is a date filter, filter the activities
-        if (filterDateRange.length > 0) {
-            let firstDateFilter = filterDateRange[0];
-            let lastDateFilter = filterDateRange[1];
-
-            // If the user selects two dates, filter by those dates, else filter by firstDate only
-            if (firstDateFilter && lastDateFilter) {
-                filteredActivities = filterActivitiesByDate(
-                    filteredActivities,
-                    firstDateFilter,
-                    lastDateFilter,
-                );
-            }
+        if (filterDateFrom && filterDateTo) {
+            filteredActivities = filterActivitiesByDate(
+                filteredActivities,
+                new Date(filterDateFrom),
+                new Date(filterDateTo),
+            );
         }
 
         // Get first and lastDate if not set
@@ -109,8 +90,8 @@
                     .toISOString()
                     .slice(0, 10);
             }
-            options["minDate"] = firstDate;
-            options["maxDate"] = lastDate;
+            filterDateFrom = firstDate;
+            filterDateTo = lastDate;
         }
     }
 
@@ -424,16 +405,22 @@
                         <option value={type}>{type}</option>
                     {/each}
                 </select>
-                <Flatpickr
-                    {options}
-                    bind:value={filterDateRange}
-                    placeholder="Select a date or range."
-                    size={23}
-                ></Flatpickr>
-                {#if filterDateRange.length > 0}
+                <input
+                    type="date"
+                    bind:value={filterDateFrom}
+                    min={firstDate}
+                    max={lastDate}
+                />
+                <input
+                    type="date"
+                    bind:value={filterDateTo}
+                    min={firstDate}
+                    max={lastDate}
+                />
+                {#if filterDateFrom || filterDateTo}
                     <button
                         class="clear-filter"
-                        on:click={() => (filterDateRange = [])}
+                        on:click={() => { filterDateFrom = ""; filterDateTo = ""; }}
                         ><i class="fas fa-times"></i></button
                     >
                 {/if}
@@ -526,14 +513,14 @@
         align-items: center;
     }
 
-    .filter-form select {
+    .filter-form select,
+    .filter-form input[type="date"] {
         padding: 0.5rem;
         border: 1px solid var(--dot-color);
         color: var(--dot-color);
         background-color: inherit;
         border-radius: 4px;
         height: 40px;
-        /* font-size: 1rem; */
     }
 
     .activities-grid {
