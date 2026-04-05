@@ -31,6 +31,13 @@
 			>
 				<a href="/projects">projects</a>
 			</li>
+			<li
+				aria-current={$page.url.pathname === "/bingo"
+					? "page"
+					: undefined}
+			>
+				<a href="/bingo">bingo</a>
+			</li>
 			<li>
 				<a href={cv} download="Lukas_Sandman_CV">resume.pdf</a>
 			</li>
